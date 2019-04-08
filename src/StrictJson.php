@@ -119,7 +119,6 @@ class StrictJson
 		} catch (ReflectionException $e) {
 			throw new InvalidConfigurationException(
 				"Adapter {$adapter_class->getName()} has no fromJson method",
-				0,
 				$e
 			);
 		}
@@ -135,11 +134,7 @@ class StrictJson
 		try {
 			return $adapter_method->invoke($adapter, $this, $value);
 		} catch (Exception $e) { // Catch all exceptions so we can re-throw with all the json info
-			throw new JsonFormatException(
-				"Adapter {$adapter_class->getName()} threw an exception",
-				0,
-				$e
-			);
+			throw new JsonFormatException("Adapter {$adapter_class->getName()} threw an exception", $e);
 		}
 	}
 
@@ -211,7 +206,7 @@ class StrictJson
 		try {
 			$class = new ReflectionClass($classname);
 		} catch (ReflectionException $e) {
-			throw new InvalidConfigurationException("Type $classname is not a valid class", 0, $e);
+			throw new InvalidConfigurationException("Type $classname is not a valid class", $e);
 		}
 
 		$constructor = $class->getConstructor();

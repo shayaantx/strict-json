@@ -29,7 +29,7 @@ class ArrayAdapter
 				$index++;
 			}
 		} catch (JsonFormatException $e) {
-			throw new JsonFormatException("Unable to map item $index", 0, $e);
+			throw new JsonFormatException("Unable to map item $index", $e);
 		}
 		return $mapped_items;
 	}
