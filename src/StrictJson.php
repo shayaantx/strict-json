@@ -25,7 +25,7 @@ class StrictJson
 		$this->type_adapters = $type_adapters;
 	}
 
-	public static function builder()
+	public static function builder(): StrictJsonBuilder
 	{
 		return new StrictJsonBuilder();
 	}
@@ -109,7 +109,7 @@ class StrictJson
 	 * @return mixed
 	 * @throws JsonFormatException
 	 */
-	private function mapWithAdapter($adapter, $value)
+	private function mapWithAdapter(object $adapter, $value)
 	{
 		try {
 			$adapter_class = new ReflectionClass($adapter);
@@ -160,7 +160,7 @@ class StrictJson
 		}
 	}
 
-	private function typesAreCompatible(ReflectionParameter $parameter, $json_value)
+	private function typesAreCompatible(ReflectionParameter $parameter, $json_value): bool
 	{
 		$parameter_type_name = $this->normalize($parameter->getType()->getName());
 		$json_type_name = $this->normalize(gettype($json_value));
@@ -180,7 +180,7 @@ class StrictJson
 	 * @param string $type_name
 	 * @return bool
 	 */
-	private function isScalarTypeName(string $type_name)
+	private function isScalarTypeName(string $type_name): bool
 	{
 		return in_array($this->normalize($type_name), self::SCALAR_TYPES);
 	}
