@@ -103,7 +103,6 @@ class StrictJson
 		}
 	}
 
-	/** @noinspection PhpDocMissingThrowsInspection */
 	/**
 	 * @param $adapter
 	 * @param $value
@@ -112,8 +111,16 @@ class StrictJson
 	 */
 	private function mapWithAdapter($adapter, $value)
 	{
-		/** @noinspection PhpUnhandledExceptionInspection */
-		$adapter_class = new ReflectionClass($adapter);
+		try {
+			$adapter_class = new ReflectionClass($adapter);
+		} catch (ReflectionException $e) {
+			$adapter_type_name = gettype($adapter);
+			throw new InvalidConfigurationException(
+				"Adapter of type $adapter_type_name is not a valid class",
+				$e
+			);
+		}
+
 		try {
 			$adapter_method = $adapter_class->getMethod('fromJson');
 		} catch (ReflectionException $e) {
