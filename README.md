@@ -57,13 +57,13 @@ var_dump($user);
 
 Results in the following output
 ```
-class Burba\StrictJson\Fixtures\Example\User#17 (3) {
+class \User#17 (3) {
   private $name =>
   string(8) "Joe User"
   private $age =>
   int(4)
   private $address =>
-  class Burba\StrictJson\Fixtures\Example\Address#18 (2) {
+  class \Address#18 (2) {
     private $street =>
     string(13) "1234 Fake St."
     private $zip_code =>
