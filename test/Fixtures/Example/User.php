@@ -8,12 +8,15 @@ class User
 	private $age;
 	/** @var Address */
 	private $address;
+	/** @var Event[] */
+	private $events_attended;
 
-	public function __construct(string $name, int $age, Address $address)
+	public function __construct(string $name, int $age, Address $address, array $events_attended = [])
 	{
 		$this->name = $name;
 		$this->age = $age;
 		$this->address = $address;
+		$this->events_attended = $events_attended;
 	}
 
 	/**
@@ -38,6 +41,14 @@ class User
 	public function getAddress(): Address
 	{
 		return $this->address;
+	}
+
+	/**
+	 * @return Event[]
+	 */
+	public function getEventsAttended(): array
+	{
+		return $this->events_attended;
 	}
 }
 
