@@ -15,13 +15,13 @@ class StrictJson
 	];
 
 	/** @var string[string[object]] */
-	private $property_adapters;
+	private $parameter_adapters;
 	/** @var array */
 	private $type_adapters;
 
-	public function __construct(array $type_adapters = [], array $property_adapters = [])
+	public function __construct(array $type_adapters = [], array $parameter_adapters = [])
 	{
-		$this->property_adapters = $property_adapters;
+		$this->parameter_adapters = $parameter_adapters;
 		$this->type_adapters = $type_adapters;
 	}
 
@@ -229,7 +229,7 @@ class StrictJson
 				throw new JsonFormatException("Value is missing field named $parameter_name");
 			}
 
-			$adapter = $this->property_adapters[$classname][$parameter_name] ?? null;
+			$adapter = $this->parameter_adapters[$classname][$parameter_name] ?? null;
 
 			if ($adapter !== null) {
 				try {
