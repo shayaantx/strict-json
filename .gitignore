@@ -1,0 +1,6 @@
+# IDE files
+.idea
+# Tool files
+.phpunit.result.cache
+# Dependencies
+vendor
