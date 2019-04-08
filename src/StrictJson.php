@@ -164,7 +164,7 @@ class StrictJson
 	{
 		$parameter_type = $parameter->getType();
 		if ($parameter_type === null) {
-			throw new InvalidConfigurationException("Parameter {$parameter->getName()} does not have a type");
+			throw new InvalidConfigurationException("Method {$parameter->getDeclaringClass()->getName()}::{$parameter->getDeclaringFunction()->getName()} parameter {$parameter->getName()} does not have a type");
 		}
 
 		$parameter_type_name = $this->normalize($parameter->getType()->getName());
