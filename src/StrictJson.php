@@ -61,6 +61,7 @@ class StrictJson
 	public function mapParsed($parsed_json, string $target_type)
 	{
 		$target_type = $this->normalize($target_type);
+
 		$adapter = $this->type_adapters[$target_type] ?? null;
 		if ($adapter !== null) {
 			return $this->mapWithAdapter($adapter, $parsed_json);
