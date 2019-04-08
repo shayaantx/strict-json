@@ -137,7 +137,12 @@ class StrictJson
 			);
 		}
 
-		$this->requireCompatibleTypes($adapter_method_params[1], $value);
+		$parsed_json_param = $adapter_method_params[1];
+		// If the adapter specifies a required type, make sure the json value matches it. But if no type is specified,
+		// allow the adapter to handle all values
+		if ($parsed_json_param->getType() !== null) {
+			$this->requireCompatibleTypes($adapter_method_params[1], $value);
+		}
 		try {
 			return $adapter_method->invoke($adapter, $this, $value);
 		} catch (Exception $e) { // Catch all exceptions so we can re-throw with all the json info
