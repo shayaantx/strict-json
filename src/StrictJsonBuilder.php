@@ -15,6 +15,11 @@ class StrictJsonBuilder
 		return $this;
 	}
 
+	public function addParameterArrayAdapter(string $class_name, string $parameter_name, string $array_item_type): self
+	{
+		return $this->addParameterAdapter($class_name, $parameter_name, new ArrayAdapter($array_item_type));
+	}
+
 	public function addClassAdapter(string $class_name, object $adapter): self
 	{
 		$this->class_adapters[$class_name] = $adapter;
