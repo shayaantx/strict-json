@@ -162,6 +162,11 @@ class StrictJson
 
 	private function typesAreCompatible(ReflectionParameter $parameter, $json_value): bool
 	{
+		$parameter_type = $parameter->getType();
+		if ($parameter_type === null) {
+			throw new InvalidConfigurationException("Parameter {$parameter->getName()} does not have a type");
+		}
+
 		$parameter_type_name = $this->normalize($parameter->getType()->getName());
 		$json_type_name = $this->normalize(gettype($json_value));
 
@@ -221,6 +226,11 @@ class StrictJson
 		$constructor_args = [];
 		foreach ($parameters as $parameter) {
 			$parameter_name = $parameter->getName();
+			$parameter_type = $parameter->getType();
+			if ($parameter_type === null) {
+				throw new InvalidConfigurationException("$classname::__construct has parameter named $parameter_name with no specified type");
+			}
+
 			if (isset($parsed_json[$parameter_name])) {
 				$value = $parsed_json[$parameter_name];
 			} else if ($parameter->isDefaultValueAvailable()) {
@@ -232,12 +242,11 @@ class StrictJson
 			}
 
 			$adapter = $this->parameter_adapters[$classname][$parameter_name] ?? null;
-
 			if ($adapter !== null) {
 				try {
 					$value = $this->mapWithAdapter($adapter, $value);
 				} catch (InvalidConfigurationException $e) {
-					throw new InvalidConfigurationException("Adapter for parameter $classname::$parameter_name has the following issues");
+					throw new InvalidConfigurationException("Adapter for parameter $classname::$parameter_name has the following issues", $e);
 				}
 			}
 
@@ -246,7 +255,7 @@ class StrictJson
 				try {
 					$value = $this->mapWithAdapter($adapter, $value);
 				} catch (InvalidConfigurationException $e) {
-					throw new InvalidConfigurationException("Adapter for parameter $classname has the following issues");
+					throw new InvalidConfigurationException("Adapter for class $classname has the following issues", $e);
 				}
 			}
 
