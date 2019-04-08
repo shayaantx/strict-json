@@ -71,55 +71,11 @@ class StrictJson
 			return $this->mapScalar($parsed_json, $target_type);
 		}
 
-		try {
-			$refl_class = new ReflectionClass($target_type);
-		} catch (ReflectionException $e) {
-			throw new InvalidConfigurationException("Type $target_type is not a valid class", 0, $e);
+		if (class_exists($target_type, $autoload = false)) {
+			return $this->mapClass($parsed_json, $target_type);
 		}
 
-		$constructor = $refl_class->getConstructor();
-		$parameters = $constructor->getParameters();
-		$constructor_args = [];
-		foreach ($parameters as $parameter) {
-			$parameter_name = $parameter->getName();
-			if (isset($parsed_json[$parameter_name])) {
-				$value = $parsed_json[$parameter_name];
-			} else if ($parameter->isDefaultValueAvailable()) {
-				// Guaranteed not to throw because we checked in the if condition
-				/** @noinspection PhpUnhandledExceptionInspection */
-				$value = $parameter->getDefaultValue();
-			} else {
-				throw new JsonFormatException("Value is missing field named $parameter_name");
-			}
-
-			$adapter = $this->property_adapters[$target_type][$parameter_name] ?? null;
-
-			if ($adapter !== null) {
-				try {
-					$value = $this->mapWithAdapter($adapter, $value);
-				} catch (InvalidConfigurationException $e) {
-					throw new InvalidConfigurationException("Adapter for parameter $target_type::$parameter_name has the following issues");
-				}
-			}
-
-			$adapter = $this->type_adapters[$target_type] ?? null;
-			if ($adapter !== null) {
-				try {
-					$value = $this->mapWithAdapter($adapter, $value);
-				} catch (InvalidConfigurationException $e) {
-					throw new InvalidConfigurationException("Adapter for parameter $target_type has the following issues");
-				}
-			}
-
-			if (!$parameter->getType()->isBuiltin() && $value !== null) {
-				$value = $this->mapParsed($value, $parameter->getType()->getName());
-			}
-
-			$this->requireCompatibleTypes($parameter, $value);
-			$constructor_args[] = $value;
-		}
-
-		return $refl_class->newInstanceArgs($constructor_args);
+		throw new InvalidConfigurationException("$target_type is not a scalar type or valid class and has no registered type adapter");
 	}
 
 	/**
@@ -241,5 +197,65 @@ class StrictJson
 		} else {
 			throw new JsonFormatException("Value is of type $json_type, expected type $target_type");
 		}
+	}
+
+	/** @noinspection PhpDocMissingThrowsInspection */
+	/**
+	 * @param $parsed_json
+	 * @param string $classname
+	 * @return object
+	 * @throws JsonFormatException
+	 */
+	private function mapClass($parsed_json, string $classname): object
+	{
+		try {
+			$class = new ReflectionClass($classname);
+		} catch (ReflectionException $e) {
+			throw new InvalidConfigurationException("Type $classname is not a valid class", 0, $e);
+		}
+
+		$constructor = $class->getConstructor();
+		$parameters = $constructor->getParameters();
+		$constructor_args = [];
+		foreach ($parameters as $parameter) {
+			$parameter_name = $parameter->getName();
+			if (isset($parsed_json[$parameter_name])) {
+				$value = $parsed_json[$parameter_name];
+			} else if ($parameter->isDefaultValueAvailable()) {
+				// Guaranteed not to throw because we checked in the if condition
+				/** @noinspection PhpUnhandledExceptionInspection */
+				$value = $parameter->getDefaultValue();
+			} else {
+				throw new JsonFormatException("Value is missing field named $parameter_name");
+			}
+
+			$adapter = $this->property_adapters[$classname][$parameter_name] ?? null;
+
+			if ($adapter !== null) {
+				try {
+					$value = $this->mapWithAdapter($adapter, $value);
+				} catch (InvalidConfigurationException $e) {
+					throw new InvalidConfigurationException("Adapter for parameter $classname::$parameter_name has the following issues");
+				}
+			}
+
+			$adapter = $this->type_adapters[$classname] ?? null;
+			if ($adapter !== null) {
+				try {
+					$value = $this->mapWithAdapter($adapter, $value);
+				} catch (InvalidConfigurationException $e) {
+					throw new InvalidConfigurationException("Adapter for parameter $classname has the following issues");
+				}
+			}
+
+			if (!$parameter->getType()->isBuiltin() && $value !== null) {
+				$value = $this->mapParsed($value, $parameter->getType()->getName());
+			}
+
+			$this->requireCompatibleTypes($parameter, $value);
+			$constructor_args[] = $value;
+		}
+
+		return $class->newInstanceArgs($constructor_args);
 	}
 }
