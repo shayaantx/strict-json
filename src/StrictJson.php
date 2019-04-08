@@ -228,7 +228,7 @@ class StrictJson
 				/** @noinspection PhpUnhandledExceptionInspection */
 				$value = $parameter->getDefaultValue();
 			} else {
-				throw new JsonFormatException("Value is missing field named $parameter_name");
+				throw new JsonFormatException("$classname::__construct has non-optional parameter named $parameter_name that does not exist in JSON");
 			}
 
 			$adapter = $this->parameter_adapters[$classname][$parameter_name] ?? null;
