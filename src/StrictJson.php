@@ -4,11 +4,10 @@ use Exception;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionParameter;
-use RuntimeException;
 
 class StrictJson
 {
-	private const BASIC_TYPES = [
+	private const SCALAR_TYPES = [
 		'int',
 		'bool',
 		'string',
@@ -18,12 +17,12 @@ class StrictJson
 	/** @var string[string[object]] */
 	private $property_adapters;
 	/** @var array */
-	private $class_adapters;
+	private $type_adapters;
 
-	public function __construct(array $class_adapters = [], array $property_adapters = [])
+	public function __construct(array $type_adapters = [], array $property_adapters = [])
 	{
 		$this->property_adapters = $property_adapters;
-		$this->class_adapters = $class_adapters;
+		$this->type_adapters = $type_adapters;
 	}
 
 	public static function builder()
@@ -61,25 +60,20 @@ class StrictJson
 	 */
 	public function mapParsed($parsed_json, string $target_type)
 	{
-		$adapter = $this->class_adapters[$target_type] ?? null;
+		$target_type = $this->normalize($target_type);
+		$adapter = $this->type_adapters[$target_type] ?? null;
 		if ($adapter !== null) {
 			return $this->mapWithAdapter($adapter, $parsed_json);
 		}
 
-		$normalized_target_type = $this->normalize($target_type);
-		if (in_array($normalized_target_type, self::BASIC_TYPES)) {
-			$json_type = $this->normalize(gettype($parsed_json));
-			if ($json_type === $normalized_target_type) {
-				return $parsed_json;
-			} else {
-				throw new JsonFormatException("Value is of type $json_type, expected type $normalized_target_type");
-			}
+		if ($this->isScalarTypeName($target_type)) {
+			return $this->mapScalar($parsed_json, $target_type);
 		}
 
 		try {
 			$refl_class = new ReflectionClass($target_type);
 		} catch (ReflectionException $e) {
-			throw new RuntimeException($e);
+			throw new InvalidConfigurationException("Type $target_type is not a valid class", 0, $e);
 		}
 
 		$constructor = $refl_class->getConstructor();
@@ -107,7 +101,7 @@ class StrictJson
 				}
 			}
 
-			$adapter = $this->class_adapters[$target_type] ?? null;
+			$adapter = $this->type_adapters[$target_type] ?? null;
 			if ($adapter !== null) {
 				try {
 					$value = $this->mapWithAdapter($adapter, $value);
@@ -127,6 +121,32 @@ class StrictJson
 		return $refl_class->newInstanceArgs($constructor_args);
 	}
 
+	/**
+	 * The "Reflection" apis and gettype return primitive names slightly differently, this forces them all to be the
+	 * same so you can compare them
+	 *
+	 * @param string $primitive_type_name
+	 *
+	 * @return string
+	 */
+	private function normalize(string $primitive_type_name)
+	{
+		switch ($primitive_type_name) {
+			case 'int':
+			case 'integer':
+				return 'int';
+			case 'double':
+			case 'float':
+				return 'float';
+			case 'bool':
+			case 'boolean':
+				return 'bool';
+			default:
+				return $primitive_type_name;
+		}
+	}
+
+	/** @noinspection PhpDocMissingThrowsInspection */
 	/**
 	 * @param $adapter
 	 * @param $value
@@ -197,30 +217,28 @@ class StrictJson
 		}
 	}
 
-	/** @noinspection PhpDocMissingThrowsInspection */
+	/**
+	 * @param string $type_name
+	 * @return bool
+	 */
+	private function isScalarTypeName(string $type_name)
+	{
+		return in_array($this->normalize($type_name), self::SCALAR_TYPES);
+	}
 
 	/**
-	 * The "Reflection" apis and gettype return primitive names slightly differently, this forces them all to be the
-	 * same so you can compare them
-	 *
-	 * @param string $primitive_type_name
-	 *
-	 * @return string
+	 * @param $parsed_json
+	 * @param string $target_type
+	 * @return mixed
+	 * @throws JsonFormatException
 	 */
-	private function normalize(string $primitive_type_name)
+	private function mapScalar($parsed_json, string $target_type)
 	{
-		switch ($primitive_type_name) {
-			case 'int':
-			case 'integer':
-				return 'int';
-			case 'double':
-			case 'float':
-				return 'float';
-			case 'bool':
-			case 'boolean':
-				return 'bool';
-			default:
-				return $primitive_type_name;
+		$json_type = $this->normalize(gettype($parsed_json));
+		if ($json_type === $target_type) {
+			return $parsed_json;
+		} else {
+			throw new JsonFormatException("Value is of type $json_type, expected type $target_type");
 		}
 	}
 }
