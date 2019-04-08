@@ -71,7 +71,7 @@ class StrictJson
 			return $this->mapScalar($parsed_json, $target_type);
 		}
 
-		if (class_exists($target_type, $autoload = false)) {
+		if (class_exists($target_type)) {
 			return $this->mapClass($parsed_json, $target_type);
 		}
 
