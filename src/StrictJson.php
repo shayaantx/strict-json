@@ -246,7 +246,8 @@ class StrictJson
 				try {
 					$value = $this->mapWithAdapter($adapter, $value);
 				} catch (InvalidConfigurationException $e) {
-					throw new InvalidConfigurationException("Adapter for parameter $classname::$parameter_name has the following issues", $e);
+					$adapter_class_name = get_class($adapter);
+					throw new InvalidConfigurationException("Unable to apply adapter for $classname::$parameter_name ($adapter_class_name)", $e);
 				}
 			}
 
