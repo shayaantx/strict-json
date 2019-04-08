@@ -23,6 +23,6 @@ class StrictJsonBuilder
 
 	public function build(): StrictJson
 	{
-		return new StrictJson($this->property_adapters, $this->class_adapters);
+		return new StrictJson($this->class_adapters, $this->property_adapters);
 	}
 }

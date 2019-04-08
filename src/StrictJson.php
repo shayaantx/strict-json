@@ -20,7 +20,7 @@ class StrictJson
 	/** @var array */
 	private $class_adapters;
 
-	public function __construct(array $property_adapters = [], array $class_adapters = [])
+	public function __construct(array $class_adapters = [], array $property_adapters = [])
 	{
 		$this->property_adapters = $property_adapters;
 		$this->class_adapters = $class_adapters;
