@@ -3,8 +3,8 @@
 A JSON parsing library that does one thing, and does it okay.
 
 Create your own simple, unannotated, php classes and have StrictJson turn JSON into your models. If the JSON doesn't
-have all the required properties, StrictJson will throw an exception, so if it returns successfully, you know your model
-is completely instantiated.
+have all the required properties or if the values don't match the types in your constructor, StrictJson will throw an
+exception, so if it returns successfully, you know your model is completely instantiated with the correct types.
 
 Requires PHP 7.2+
 
