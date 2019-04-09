@@ -262,15 +262,6 @@ class StrictJson
 				}
 			}
 
-			$adapter = $this->type_adapters[$classname] ?? null;
-			if ($adapter !== null) {
-				try {
-					$value = $this->mapWithAdapter($adapter, $value);
-				} catch (InvalidConfigurationException $e) {
-					throw new InvalidConfigurationException("Adapter for class $classname has the following issues", $e);
-				}
-			}
-
 			if (!$parameter->getType()->isBuiltin() && $value !== null) {
 				$value = $this->mapParsed($value, $parameter->getType()->getName());
 			}
