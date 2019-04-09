@@ -145,8 +145,10 @@ class StrictJson
 		}
 		try {
 			return $adapter_method->invoke($adapter, $this, $value);
-		} catch (Exception $e) { // Catch all exceptions so we can re-throw with all the json info
-			throw new JsonFormatException("Adapter {$adapter_class->getName()} threw an exception", $e);
+		} /** @noinspection PhpRedundantCatchClauseInspection */ catch (JsonFormatException $e) {
+			throw new JsonFormatException("Adapter {$adapter_class->getName()} was unable to adapt the parsed json", $e);
+		} catch (Exception $e) {
+			throw new InvalidConfigurationException("Adapter {$adapter_class->getName()} threw an exception", $e);
 		}
 	}
 
