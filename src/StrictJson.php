@@ -175,7 +175,7 @@ class StrictJson
 			// happen to verify that the parameter has a type before calling this
 			// @codeCoverageIgnoreStart
 			throw new InvalidConfigurationException("Method {$parameter->getDeclaringClass()->getName()}::{$parameter->getDeclaringFunction()->getName()} parameter {$parameter->getName()} does not have a type");
-			// @codeCoverageIgnoreStop
+			// @codeCoverageIgnoreEnd
 		}
 
 		$parameter_type_name = $this->normalize($parameter->getType()->getName());
