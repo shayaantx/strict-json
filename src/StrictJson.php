@@ -109,7 +109,7 @@ class StrictJson
 	 * @return mixed
 	 * @throws JsonFormatException
 	 */
-	private function mapWithAdapter(object $adapter, $value)
+	private function mapWithAdapter($adapter, $value)
 	{
 		try {
 			$adapter_class = new ReflectionClass($adapter);
@@ -179,7 +179,7 @@ class StrictJson
 			return true;
 		} else if ($parameter->allowsNull() && $json_type_name === 'NULL') {
 			return true;
-		} else if ($json_value !== null && $parameter->getType()->getName() == get_class($json_value)) {
+		} else if (is_object($json_value) && $parameter->getType()->getName() == get_class($json_value)) {
 			return true;
 		} else {
 			return false;
@@ -251,8 +251,12 @@ class StrictJson
 				try {
 					$value = $this->mapWithAdapter($adapter, $value);
 				} catch (InvalidConfigurationException $e) {
-					$adapter_class_name = get_class($adapter);
-					throw new InvalidConfigurationException("Unable to apply adapter for $classname::$parameter_name ($adapter_class_name)", $e);
+					if (is_object($adapter)) {
+						$adapter_description = get_class($adapter);
+					} else {
+						$adapter_description = gettype($adapter);
+					}
+					throw new InvalidConfigurationException("Unable to apply adapter for $classname::$parameter_name ($adapter_description)", $e);
 				}
 			}
 
