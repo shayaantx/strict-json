@@ -2,5 +2,6 @@
 .idea
 # Tool files
 .phpunit.result.cache
+infection.log
 # Dependencies
 vendor

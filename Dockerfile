@@ -1,4 +1,4 @@
-FROM php:7.2
+FROM php:7.2-cli
 
 RUN apt-get update && apt-get install git zip unzip -y
 RUN pecl install xdebug && docker-php-ext-enable xdebug
