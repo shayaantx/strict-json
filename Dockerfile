@@ -10,4 +10,4 @@ COPY composer.json composer.lock ./
 RUN COMPOSER_ALLOW_SUPERUSER=1 composer install
 
 COPY . .
-CMD "vendor/bin/phpunit"
+CMD ["vendor/bin/phpunit", "test"]
