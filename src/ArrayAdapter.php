@@ -22,14 +22,12 @@ class ArrayAdapter
 	public function fromJson(StrictJson $delegate, array $items): array
 	{
 		$mapped_items = [];
-		$index = 0;
 		try {
-			foreach ($items as $item) {
+			foreach ($items as $idx => $item) {
 				$mapped_items[] = $delegate->mapParsed($item, $this->item_type);
-				$index++;
 			}
 		} catch (JsonFormatException $e) {
-			throw new JsonFormatException("Unable to map item $index", $e);
+			throw new JsonFormatException("Unable to map item $idx", $e);
 		}
 		return $mapped_items;
 	}

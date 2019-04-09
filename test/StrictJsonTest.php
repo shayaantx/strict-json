@@ -1,10 +1,16 @@
 <?php namespace Burba\StrictJson;
 
+use Burba\StrictJson\Fixtures\AdapterThatThrowsJsonFormatException;
+use Burba\StrictJson\Fixtures\AdapterThatThrowsRuntimeException;
+use Burba\StrictJson\Fixtures\AdapterWithoutFromJson;
+use Burba\StrictJson\Fixtures\AdapterWithWrongNumberOfArguments;
 use Burba\StrictJson\Fixtures\BasicClass;
 use Burba\StrictJson\Fixtures\ClassPropClass;
+use Burba\StrictJson\Fixtures\Example\User;
 use Burba\StrictJson\Fixtures\IntArrayPropClass;
 use Burba\StrictJson\Fixtures\IntPropClass;
 use Burba\StrictJson\Fixtures\IntPropClassAdapterThatAddsFour;
+use Burba\StrictJson\Fixtures\NoTypesInConstructor;
 use PHPUnit\Framework\TestCase;
 
 class StrictJsonTest extends TestCase
@@ -86,5 +92,126 @@ class StrictJsonTest extends TestCase
 			new ClassPropClass(new IntPropClass(5)),
 			$mapper->map($json, ClassPropClass::class)
 		);
+	}
+
+	/**
+	 * @throws JsonFormatException
+	 */
+	public function testInvalidJson()
+	{
+		$mapper = new StrictJson();
+		$json = '{ invalid';
+		$this->expectException(JsonFormatException::class);
+		$mapper->map($json, User::class);
+	}
+
+	/**
+	 * @throws JsonFormatException
+	 */
+	public function testInvalidTargetType()
+	{
+		$mapper = new StrictJson();
+		$json = '{"does_not": "matter"}';
+		$this->expectException(InvalidConfigurationException::class);
+		$mapper->map($json, 'invalid');
+	}
+
+	/**
+	 * Verify that passing invalid values in for class adapters always throws a config exception
+	 *
+	 * @throws JsonFormatException
+	 * @dataProvider invalidAdapterProvider
+	 */
+	public function testInvalidClassAdapter($adapter)
+	{
+		$mapper = new StrictJson([IntPropClass::class => $adapter]);
+		$json = '{"does_not": "matter"}';
+		$this->expectException(InvalidConfigurationException::class);
+		$mapper->map($json, IntPropClass::class);
+	}
+
+	/**
+	 * Verify that passing invalid values in for parameter adapters always throws a config exception
+	 *
+	 * @throws JsonFormatException
+	 * @dataProvider invalidAdapterProvider
+	 */
+	public function testInvalidParameterAdapter($adapter)
+	{
+		$mapper = new StrictJson([], [IntPropClass::class => ['int_prop' => $adapter]]);
+		$json = '{ "int_prop": 1 }';
+		$this->expectException(InvalidConfigurationException::class);
+		$mapper->map($json, IntPropClass::class);
+	}
+
+	/**
+	 * @throws JsonFormatException
+	 */
+	public function testClassAdapterThatThrowsJsonFormatException()
+	{
+		$mapper = new StrictJson([IntPropClass::class => new AdapterThatThrowsJsonFormatException()]);
+		$json = '{"does_not": "matter"}';
+		$this->expectException(JsonFormatException::class);
+		$mapper->map($json, IntPropClass::class);
+	}
+
+	/**
+	 * Verify that parsing json with types that don't match the target class' constructor args throws a
+	 * JsonFormatException
+	 * @throws JsonFormatException
+	 */
+	public function testMismatchedTypes()
+	{
+		$mapper = new StrictJson();
+		$json = '{"int_prop": "1"}';
+		$this->expectException(JsonFormatException::class);
+		$mapper->map($json, IntPropClass::class);
+	}
+
+	/**
+	 * Verify that trying to map to a class that has constructor arguments that don't have types throws an
+	 * InvalidFormatException
+	 * @throws JsonFormatException
+	 */
+	public function testClassWithNonTypedConstructorArgs()
+	{
+		$mapper = new StrictJson();
+		$json = '{"unknown_property": "value"}';
+		$this->expectException(InvalidConfigurationException::class);
+		$mapper->map($json, NoTypesInConstructor::class);
+	}
+
+	/**
+	 * @throws JsonFormatException
+	 */
+	public function testMissingProperty()
+	{
+		$mapper = new StrictJson();
+		$json = '{"unknown_property": "value"}';
+		$this->expectException(JsonFormatException::class);
+		$mapper->map($json, IntPropClass::class);
+	}
+
+	/**
+	 * @throws JsonFormatException
+	 */
+	public function testJsonHasWrongItemType()
+	{
+		$mapper = StrictJson::builder()
+			->addParameterArrayAdapter(IntArrayPropClass::class, 'int_array_prop', 'int')
+			->build();
+		$json = '{"int_array_prop": [1, "2", 3]}';
+		$this->expectException(JsonFormatException::class);
+		$mapper->map($json, IntArrayPropClass::class);
+	}
+
+	public function invalidAdapterProvider()
+	{
+		return [
+			['Adapter with no fromJson method' => new AdapterWithoutFromJson()],
+			['Adapter with wrong number of arguments' => new AdapterWithWrongNumberOfArguments()],
+			['Adapter that is secretly a number' => 2],
+			['Adapter than throws a runtime exception' => new AdapterThatThrowsRuntimeException()],
+		];
 	}
 }

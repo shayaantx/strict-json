@@ -171,7 +171,11 @@ class StrictJson
 	{
 		$parameter_type = $parameter->getType();
 		if ($parameter_type === null) {
+			// With the current code it's impossible to trigger this state with the public api, because all callers
+			// happen to verify that the parameter has a type before calling this
+			// @codeCoverageIgnoreStart
 			throw new InvalidConfigurationException("Method {$parameter->getDeclaringClass()->getName()}::{$parameter->getDeclaringFunction()->getName()} parameter {$parameter->getName()} does not have a type");
+			// @codeCoverageIgnoreStop
 		}
 
 		$parameter_type_name = $this->normalize($parameter->getType()->getName());
@@ -224,8 +228,12 @@ class StrictJson
 	{
 		try {
 			$class = new ReflectionClass($classname);
+			// @codeCoverageIgnoreStart
 		} catch (ReflectionException $e) {
+			// Right now it's not possible to trigger this exception from the public API, because the only method that
+			// calls this checks if $classname is a class first
 			throw new InvalidConfigurationException("Type $classname is not a valid class", $e);
+			// @codeCoverageIgnoreEnd
 		}
 
 		$constructor = $class->getConstructor();
