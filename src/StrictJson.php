@@ -116,7 +116,7 @@ class StrictJson
 		} catch (ReflectionException $e) {
 			$adapter_type_name = gettype($adapter);
 			throw new InvalidConfigurationException(
-				"Adapter of type $adapter_type_name is not a valid class",
+				"Adapter of type \"$adapter_type_name\" is not a valid class",
 				$e
 			);
 		}
