@@ -4,8 +4,8 @@ use Burba\StrictJson\StrictJson;
 
 class AdapterWithWrongNumberOfArguments
 {
-	public function fromJson(/** @noinspection PhpUnusedParameterInspection */ StrictJson $delegate): ?string
-	{
-		return null;
-	}
+    public function fromJson(/** @noinspection PhpUnusedParameterInspection */ StrictJson $delegate): ?string
+    {
+        return null;
+    }
 }

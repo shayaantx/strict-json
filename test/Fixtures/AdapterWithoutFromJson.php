@@ -2,8 +2,8 @@
 
 class AdapterWithoutFromJson
 {
-	public function toJson()
-	{
-		return 'This should have been fromJson';
-	}
+    public function toJson()
+    {
+        return 'This should have been fromJson';
+    }
 }

@@ -5,8 +5,8 @@ use RuntimeException;
 
 class AdapterThatThrowsRuntimeException
 {
-	public function fromJson(/** @noinspection PhpUnusedParameterInspection */ StrictJson $delegate, $parsed_json)
-	{
-		throw new RuntimeException("I'm a very bad adapter");
-	}
+    public function fromJson(/** @noinspection PhpUnusedParameterInspection */ StrictJson $delegate, $parsed_json)
+    {
+        throw new RuntimeException("I'm a very bad adapter");
+    }
 }

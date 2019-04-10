@@ -4,5 +4,6 @@
 # Tool files
 .phpunit.result.cache
 infection.log
+.php_cs.cache
 # Dependencies
 vendor
