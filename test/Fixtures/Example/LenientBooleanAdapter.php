@@ -4,8 +4,8 @@ use Burba\StrictJson\StrictJson;
 
 class LenientBooleanAdapter
 {
-	public function fromJson(StrictJson $delegate, $parsed_value): bool
-	{
-		return (bool)$parsed_value;
-	}
+    public function fromJson(StrictJson $delegate, $parsed_value): bool
+    {
+        return (bool)$parsed_value;
+    }
 }
