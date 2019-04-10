@@ -1,5 +1,6 @@
 # IDE files
 .idea
+*.iml
 # Tool files
 .phpunit.result.cache
 infection.log
