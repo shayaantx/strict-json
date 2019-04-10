@@ -43,7 +43,7 @@ class StrictJson
 		if (json_last_error()) {
 			$err = json_last_error_msg();
 			throw new JsonFormatException(
-				"Invalid json $err: $json"
+				"Unable to parse invalid JSON ($err): $json"
 			);
 		}
 

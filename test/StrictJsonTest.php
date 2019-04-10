@@ -102,6 +102,7 @@ class StrictJsonTest extends TestCase
 		$mapper = new StrictJson();
 		$json = '{ invalid';
 		$this->expectException(JsonFormatException::class);
+        $this->expectExceptionMessage("Unable to parse invalid JSON (Syntax error): $json");
 		$mapper->map($json, User::class);
 	}
 
