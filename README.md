@@ -1,6 +1,6 @@
 # StrictJson
 
-A JSON parsing library that does one thing, and does it okay.
+A JSON mapping library that does one thing, and does it okay.
 
 Create your own simple, unannotated, php classes and have StrictJson turn JSON into your models. If the JSON doesn't
 have all the required properties or if the values don't match the types in your constructor, StrictJson will throw an
