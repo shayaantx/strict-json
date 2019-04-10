@@ -75,7 +75,7 @@ class StrictJson
 			return $this->mapClass($parsed_json, $target_type);
 		}
 
-		throw new InvalidConfigurationException("$target_type is not a scalar type or valid class and has no registered type adapter");
+        throw new InvalidConfigurationException("Target type \"$target_type\" is not a scalar type or valid class and has no registered type adapter");
 	}
 
 	/**

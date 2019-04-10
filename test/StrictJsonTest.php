@@ -114,6 +114,7 @@ class StrictJsonTest extends TestCase
 		$mapper = new StrictJson();
 		$json = '{"does_not": "matter"}';
 		$this->expectException(InvalidConfigurationException::class);
+		$this->expectExceptionMessage('Target type "invalid" is not a scalar type or valid class and has no registered type adapter');
 		$mapper->map($json, 'invalid');
 	}
 
