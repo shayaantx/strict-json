@@ -43,7 +43,7 @@ class StrictJson
 		if (json_last_error()) {
 			$err = json_last_error_msg();
 			throw new JsonFormatException(
-				"Invalid json $err: $json"
+				"Unable to parse invalid JSON ($err): $json"
 			);
 		}
 
@@ -75,7 +75,7 @@ class StrictJson
 			return $this->mapClass($parsed_json, $target_type);
 		}
 
-		throw new InvalidConfigurationException("$target_type is not a scalar type or valid class and has no registered type adapter");
+        throw new InvalidConfigurationException("Target type \"$target_type\" is not a scalar type or valid class and has no registered type adapter");
 	}
 
 	/**
@@ -116,7 +116,7 @@ class StrictJson
 		} catch (ReflectionException $e) {
 			$adapter_type_name = gettype($adapter);
 			throw new InvalidConfigurationException(
-				"Adapter of type $adapter_type_name is not a valid class",
+				"Adapter of type \"$adapter_type_name\" is not a valid class",
 				$e
 			);
 		}

@@ -102,6 +102,7 @@ class StrictJsonTest extends TestCase
 		$mapper = new StrictJson();
 		$json = '{ invalid';
 		$this->expectException(JsonFormatException::class);
+		$this->expectExceptionMessage("Unable to parse invalid JSON (Syntax error): $json");
 		$mapper->map($json, User::class);
 	}
 
@@ -113,20 +114,24 @@ class StrictJsonTest extends TestCase
 		$mapper = new StrictJson();
 		$json = '{"does_not": "matter"}';
 		$this->expectException(InvalidConfigurationException::class);
+		$this->expectExceptionMessage('Target type "invalid" is not a scalar type or valid class and has no registered type adapter');
 		$mapper->map($json, 'invalid');
 	}
 
 	/**
 	 * Verify that passing invalid values in for class adapters always throws a config exception
 	 *
+	 * @param $adapter
+	 * @param $expected_exception_message
 	 * @throws JsonFormatException
 	 * @dataProvider invalidAdapterProvider
 	 */
-	public function testInvalidClassAdapter($adapter)
+	public function testInvalidClassAdapter($adapter, $expected_exception_message)
 	{
 		$mapper = new StrictJson([IntPropClass::class => $adapter]);
 		$json = '{"does_not": "matter"}';
 		$this->expectException(InvalidConfigurationException::class);
+		$this->expectExceptionMessage($expected_exception_message);
 		$mapper->map($json, IntPropClass::class);
 	}
 
@@ -208,10 +213,22 @@ class StrictJsonTest extends TestCase
 	public function invalidAdapterProvider()
 	{
 		return [
-			['Adapter with no fromJson method' => new AdapterWithoutFromJson()],
-			['Adapter with wrong number of arguments' => new AdapterWithWrongNumberOfArguments()],
-			['Adapter that is secretly a number' => 2],
-			['Adapter than throws a runtime exception' => new AdapterThatThrowsRuntimeException()],
+			'Adapter with no fromJson method' => [
+				new AdapterWithoutFromJson(),
+				'Adapter Burba\StrictJson\Fixtures\AdapterWithoutFromJson has no fromJson method',
+			],
+			'Adapter with wrong number of arguments' => [
+				new AdapterWithWrongNumberOfArguments(),
+				"Adapter Burba\StrictJson\Fixtures\AdapterWithWrongNumberOfArguments's fromJson method has the wrong number of parameters, needs exactly 2'",
+			],
+			'Adapter that is secretly a number' => [
+				2,
+				'Adapter of type "integer" is not a valid class',
+			],
+			'Adapter than throws a runtime exception' => [
+				new AdapterThatThrowsRuntimeException(),
+				"Adapter Burba\StrictJson\Fixtures\AdapterThatThrowsRuntimeException threw an exception",
+			],
 		];
 	}
 }
