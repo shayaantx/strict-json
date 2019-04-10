@@ -14,8 +14,8 @@ jobs:
           name: Check code style
           command: "./scripts/check_code_style.sh"
       - run:
-          name: Run Tests
+          name: Run tests
           command: "./scripts/run_tests.sh"
       - run:
-          name: Run Mutation Tests
+          name: Run mutation tests
           command: "./scripts/run_infection.sh"
