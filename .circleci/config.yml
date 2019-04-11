@@ -22,10 +22,13 @@ jobs:
       - run:
           name: Run Tests
           command: "./scripts/run_tests.sh"
+      - run:
+          name: Run Mutation Tests
+          command: "./scripts/run_mutation_tests.sh"
       - store_test_results:
           path: test-results/
       - store_artifacts:
           path: test-results/
       - run:
-          name: Run Mutation Tests
-          command: "./scripts/run_mutation_tests.sh"
+          name: Upload Coverage Report
+          command: "bash <(curl -s https://codecov.io/bash)"
