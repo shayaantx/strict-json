@@ -28,4 +28,4 @@ jobs:
           path: test-results/
       - run:
           name: Run Mutation Tests
-          command: "./scripts/run_infection.sh"
+          command: "./scripts/run_mutation_tests.sh"
