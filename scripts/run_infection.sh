@@ -2,6 +2,7 @@
 set -euo pipefail
 
 vendor/bin/infection \
-    --initial-tests-php-options="-d zend_extension=xdebug.so" --threads=$(nproc) \
+    --threads=$(nproc) \
+    --coverage=test-results/phpunit/ \
     --min-msi=89 \
     --min-covered-msi=92
