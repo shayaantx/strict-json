@@ -6,7 +6,9 @@
     ]
   },
   "logs": {
-    "text": "infection.log"
+    "text": "test-results/infection/infection.log",
+    "summary": "test-results/infection/summary.txt",
+    "perMutator": "test-results/infection/per_mutator.md"
   },
   "mutators": {
     "@default": true,

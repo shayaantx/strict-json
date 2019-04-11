@@ -3,7 +3,6 @@
 *.iml
 # Tool files
 .phpunit.result.cache
-infection.log
 .php_cs.cache
 # Tool output directory
 test-results
