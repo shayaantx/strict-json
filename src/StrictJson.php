@@ -237,6 +237,9 @@ class StrictJson
         }
 
         $constructor = $class->getConstructor();
+        if ($constructor === null) {
+            throw new InvalidConfigurationException("Type $classname does not have a valid constructor");
+        }
         $parameters = $constructor->getParameters();
         $constructor_args = [];
         foreach ($parameters as $parameter) {
