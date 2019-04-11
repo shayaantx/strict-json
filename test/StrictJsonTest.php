@@ -10,6 +10,7 @@ use Burba\StrictJson\Fixtures\Example\User;
 use Burba\StrictJson\Fixtures\IntArrayPropClass;
 use Burba\StrictJson\Fixtures\IntPropClass;
 use Burba\StrictJson\Fixtures\IntPropClassAdapterThatAddsFour;
+use Burba\StrictJson\Fixtures\MissingConstructorClass;
 use Burba\StrictJson\Fixtures\NoTypesInConstructor;
 use PHPUnit\Framework\TestCase;
 
@@ -213,6 +214,19 @@ class StrictJsonTest extends TestCase
         $json = '{"int_array_prop": [1, "2", 3]}';
         $this->expectException(JsonFormatException::class);
         $mapper->map($json, IntArrayPropClass::class);
+    }
+
+    /**
+     * @throws JsonFormatException
+     */
+    public function testMissingConstructor()
+    {
+        $mapper = new StrictJson();
+        $json = '{"does not": "mattter"}';
+        $this->expectException(InvalidConfigurationException::class);
+        $classname = MissingConstructorClass::class;
+        $this->expectExceptionMessage("Type $classname does not have a valid constructor");
+        $mapper->map($json, MissingConstructorClass::class);
     }
 
     public function invalidAdapterProvider()
