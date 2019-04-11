@@ -10,18 +10,18 @@ jobs:
             - composer-v1-{{ checksum "composer.lock" }}
             - composer-v1-
       - run:
-          name: Install dependencies
+          name: Install Dependencies
           command: "composer install -n --prefer-dist --no-progress"
       - save_cache:
           key: composer-v1-{{ checksum "composer.lock" }}
           paths:
             - vendor
       - run:
-          name: Check code style
+          name: Check Code Style
           command: "./scripts/check_code_style.sh"
       - run:
-          name: Run tests
+          name: Run Tests
           command: "./scripts/run_tests.sh"
       - run:
-          name: Run mutation tests
+          name: Run Mutation Tests
           command: "./scripts/run_infection.sh"
