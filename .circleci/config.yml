@@ -2,20 +2,33 @@ version: 2
 jobs:
   build:
     docker:
-      - image: "circleci/buildpack-deps"
+      - image: "circleci/php:7.3-cli"
     steps:
       - checkout
-      - setup_remote_docker:
-          docker_layer_caching: true
+      - restore_cache:
+          keys:
+            - composer-v1-{{ checksum "composer.lock" }}
+            - composer-v1-
       - run:
-          name: Build Docker image
-          command: "./scripts/build_docker.sh"
+          name: Install Dependencies
+          command: "composer install -n --prefer-dist --no-progress"
+      - save_cache:
+          key: composer-v1-{{ checksum "composer.lock" }}
+          paths:
+            - vendor
       - run:
-          name: Check code style
+          name: Check Code Style
           command: "./scripts/check_code_style.sh"
       - run:
-          name: Run tests
+          name: Run Tests
           command: "./scripts/run_tests.sh"
       - run:
-          name: Run mutation tests
-          command: "./scripts/run_infection.sh"
+          name: Run Mutation Tests
+          command: "./scripts/run_mutation_tests.sh"
+      - store_test_results:
+          path: test-results/
+      - store_artifacts:
+          path: test-results/
+      - run:
+          name: Upload Coverage Report
+          command: "bash <(curl -s https://codecov.io/bash)"
