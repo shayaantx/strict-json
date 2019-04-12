@@ -5,8 +5,8 @@ use Burba\StrictJson\Fixtures\AdapterThatThrowsRuntimeException;
 use Burba\StrictJson\Fixtures\AdapterWithoutFromJson;
 use Burba\StrictJson\Fixtures\AdapterWithWrongNumberOfArguments;
 use Burba\StrictJson\Fixtures\BasicClass;
-use Burba\StrictJson\Fixtures\HasClassProp;
 use Burba\StrictJson\Fixtures\Example\User;
+use Burba\StrictJson\Fixtures\HasClassProp;
 use Burba\StrictJson\Fixtures\HasIntArrayProp;
 use Burba\StrictJson\Fixtures\HasIntProp;
 use Burba\StrictJson\Fixtures\HasNullableProp;
@@ -56,11 +56,7 @@ class StrictJsonTest extends TestCase
     {
         $json = '{ "int_array_prop": [1, 2, 3] }';
         $mapper = StrictJson::builder()
-            ->addParameterAdapter(
-                HasIntArrayProp::class,
-                'int_array_prop',
-                new ArrayAdapter('int')
-            )
+            ->addParameterArrayAdapter(HasIntArrayProp::class, 'int_array_prop', 'int')
             ->build();
 
         $this->assertEquals(
