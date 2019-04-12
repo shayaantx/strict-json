@@ -2,7 +2,7 @@
 
 namespace Burba\StrictJson\Fixtures;
 
-class IntPropClass
+class HasIntProp
 {
     /** @var int */
     private $int_prop;
