@@ -9,6 +9,7 @@ use Burba\StrictJson\Fixtures\HasClassProp;
 use Burba\StrictJson\Fixtures\Example\User;
 use Burba\StrictJson\Fixtures\HasIntArrayProp;
 use Burba\StrictJson\Fixtures\HasIntProp;
+use Burba\StrictJson\Fixtures\HasNullableProp;
 use Burba\StrictJson\Fixtures\IntPropClassAdapterThatAddsFour;
 use Burba\StrictJson\Fixtures\MissingConstructor;
 use Burba\StrictJson\Fixtures\NoTypesInConstructor;
@@ -241,6 +242,30 @@ class StrictJsonTest extends TestCase
         $this->expectException(JsonFormatException::class);
         $this->expectExceptionMessage('Parameter "parsed_json" has type "array" in class but has type "integer" in JSON');
         $mapper->map($json, HasClassProp::class);
+    }
+
+    /**
+     * @throws JsonFormatException
+     */
+    public function testNullableParameterWithNullValue()
+    {
+        $mapper = new StrictJson();
+        $json = '{"nullable_prop": null}';
+        $this->assertEquals(
+            new HasNullableProp(null),
+            $mapper->map($json, HasNullableProp::class)
+        );
+    }
+
+    /**
+     * @throws JsonFormatException
+     */
+    public function testNullValueForNonNullableParameter()
+    {
+        $mapper = new StrictJson();
+        $json = '{"int_prop": null}';
+        $this->expectException(JsonFormatException::class);
+        $mapper->map($json, HasIntProp::class);
     }
 
     public function invalidAdapterProvider()

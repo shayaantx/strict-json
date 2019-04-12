@@ -295,7 +295,7 @@ class StrictJson
                 throw new InvalidConfigurationException("$classname::__construct has parameter named $parameter_name with no specified type");
             }
 
-            if (isset($parsed_json[$parameter_name])) {
+            if (array_key_exists($parameter_name, $parsed_json)) {
                 $value = $parsed_json[$parameter_name];
             } elseif ($parameter->isDefaultValueAvailable()) {
                 // Guaranteed not to throw because we checked in the if condition
