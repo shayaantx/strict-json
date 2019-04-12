@@ -229,6 +229,20 @@ class StrictJsonTest extends TestCase
         $mapper->map($json, MissingConstructorClass::class);
     }
 
+    /**
+     * Verify that StrictJson throws an exception when an Adapter specifies a type but the JSON type doesn't match
+     *
+     * @throws JsonFormatException
+     */
+    public function testMismatchedAdapterParameterJsonField()
+    {
+        $mapper = new StrictJson([IntPropClass::class => new IntPropClassAdapterThatAddsFour()]);
+        $json = '{"int_prop_class": 4}';
+        $this->expectException(JsonFormatException::class);
+        $this->expectExceptionMessage('Parameter "parsed_json" has type "array" in class but has type "integer" in JSON');
+        $mapper->map($json, ClassPropClass::class);
+    }
+
     public function invalidAdapterProvider()
     {
         return [

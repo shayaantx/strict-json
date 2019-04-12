@@ -200,7 +200,7 @@ class StrictJson
         if (!$this->typesAreCompatible($parameter, $value)) {
             $json_type = gettype($value);
             throw new JsonFormatException(
-                "{$parameter->getName()} has type {$parameter->getType()} in class but has type $json_type in json"
+                "Parameter \"{$parameter->getName()}\" has type \"{$parameter->getType()}\" in class but has type \"$json_type\" in JSON"
             );
         }
     }
