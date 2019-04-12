@@ -7,10 +7,6 @@ class StrictJsonBuilder
 
     public function addParameterAdapter(string $class_name, string $parameter_name, object $adapter): self
     {
-        if (!isset($this->parameter_adapters[$class_name])) {
-            $this->parameter_adapters[$class_name] = [];
-        }
-
         $this->parameter_adapters[$class_name][$parameter_name] = $adapter;
         return $this;
     }
