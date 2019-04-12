@@ -2,16 +2,12 @@
 
 class StrictJsonBuilder
 {
-    private $property_adapters = [];
+    private $parameter_adapters = [];
     private $class_adapters = [];
 
     public function addParameterAdapter(string $class_name, string $parameter_name, object $adapter): self
     {
-        if (!isset($this->property_adapters[$class_name])) {
-            $this->property_adapters[$class_name] = [];
-        }
-
-        $this->property_adapters[$class_name][$parameter_name] = $adapter;
+        $this->parameter_adapters[$class_name][$parameter_name] = $adapter;
         return $this;
     }
 
@@ -28,6 +24,6 @@ class StrictJsonBuilder
 
     public function build(): StrictJson
     {
-        return new StrictJson($this->class_adapters, $this->property_adapters);
+        return new StrictJson($this->class_adapters, $this->parameter_adapters);
     }
 }

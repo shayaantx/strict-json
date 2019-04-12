@@ -236,4 +236,3 @@ $mapper = StrictJson::builder()
 * Add docs for optional parameters, nullable fields (See StrictJsonTest::testBasicClass for now)
 * Better error messages
 * Always include complete json in thrown exceptions
-* Fix or ignore all the issues the mutation tests found
