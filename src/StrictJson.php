@@ -19,23 +19,56 @@ class StrictJson
     /** @var array */
     private $type_adapters;
 
+    /**
+     * Create an instance of StrictJson configured with type and parameter adapters.
+     *
+     * An adapter is a class with a method named fromJson that takes exactly two arguments.
+     * The first argument should be of type StrictJson, which you can use when you want to delegate parsing of a
+     * sub-property to the base library.
+     * The second argument should be the type you expect the property to be in the json, or not specified if you want to
+     * accept multiple different JSON types. If you do specify a type, StrictJson will validate that the JSON property
+     * is that type before passing it to your adapter
+     * If the return type is specified, StrictJson will validate that the target parameter has a matching type. If no
+     * return type is specified, StrictJson will assume you know what you're doing which may cause unexpected exceptions
+     * for parameter adapters that return the wrong types for their parameter
+     *
+     * If you're doing more than very simple configuration, you probably want to use the static build method, which
+     * gives you a nicer fluent interface for configuration
+     *
+     * @see StrictJson::builder()
+     *
+     * @param array $type_adapters A mapping of string type names to adapter objects. The type names can be either full
+     * class names (including the namespace) or names of primitives if you want to change the way all primitives are
+     * mapped
+     * @param array $parameter_adapters A mapping of string type names to associative arrays, which map parameter names
+     * to adapters. If you're configuring these, you probably want to use the StrictJson::builder() method instead
+     */
     public function __construct(array $type_adapters = [], array $parameter_adapters = [])
     {
         $this->parameter_adapters = $parameter_adapters;
         $this->type_adapters = $type_adapters;
     }
 
+    /**
+     * Create a builder for this class for advanced fluent configuration
+     *
+     * @return StrictJsonBuilder
+     */
     public static function builder(): StrictJsonBuilder
     {
         return new StrictJsonBuilder();
     }
 
     /**
-     * @param string $json
-     * @param string $class
+     * Convert the given json into an instance of the given class
      *
-     * @return object
-     * @throws JsonFormatException
+     * @param string $json The json string to convert
+     * @param string $class The class to map the json into
+     *
+     * @return object The parsed JSON in the type of $class
+     *
+     * @throws JsonFormatException If $json is not valid JSON, or if the constructor for $class has parameters that do
+     * not match in name AND type to the JSON's properties
      */
     public function map(string $json, string $class)
     {
@@ -50,11 +83,11 @@ class StrictJson
         return $this->mapParsed($parsed, $class);
     }
 
-    /** @noinspection PhpDocMissingThrowsInspection */
     /**
-     * @param array|string|int|bool $parsed_json
-     * @param string $target_type
+     * Convert decoded json into an instance of the given target type
      *
+     * @param mixed $parsed_json An associative array or other primitive
+     * @param string $target_type
      * @return mixed
      * @throws JsonFormatException
      */
@@ -104,10 +137,13 @@ class StrictJson
     }
 
     /**
-     * @param $adapter
-     * @param $value
-     * @return mixed
-     * @throws JsonFormatException
+     * Map a given decoded json value with the specified adapter
+     *
+     * @param object $adapter Object with a fromJson method
+     * @param string|int|array|bool|float $value The decoded json value to adapt
+     *
+     * @return mixed Whatever the adapter returns
+     * @throws JsonFormatException If the provided value doesn't match the value the adapter expects
      */
     private function mapWithAdapter($adapter, $value)
     {
@@ -153,8 +189,10 @@ class StrictJson
     }
 
     /**
+     * Throw an exception if the value is not valid to pass for the given parameter
+     *
      * @param ReflectionParameter $parameter
-     * @param $value
+     * @param mixed $value
      * @throws JsonFormatException
      */
     private function requireCompatibleTypes(ReflectionParameter $parameter, $value): void
@@ -167,7 +205,15 @@ class StrictJson
         }
     }
 
-    private function typesAreCompatible(ReflectionParameter $parameter, $json_value): bool
+    /**
+     * Check if the provided value is valid to pass to the given parameter
+     *
+     * @param ReflectionParameter $parameter
+     * @param $value
+     *
+     * @return bool
+     */
+    private function typesAreCompatible(ReflectionParameter $parameter, $value): bool
     {
         $parameter_type = $parameter->getType();
         if ($parameter_type === null) {
@@ -179,13 +225,13 @@ class StrictJson
         }
 
         $parameter_type_name = $this->normalize($parameter->getType()->getName());
-        $json_type_name = $this->normalize(gettype($json_value));
+        $json_type_name = $this->normalize(gettype($value));
 
         if ($parameter_type_name === $json_type_name) {
             return true;
         } elseif ($parameter->allowsNull() && $json_type_name === 'NULL') {
             return true;
-        } elseif (is_object($json_value) && $parameter->getType()->getName() == get_class($json_value)) {
+        } elseif (is_object($value) && $parameter->getType()->getName() == get_class($value)) {
             return true;
         } else {
             return false;
