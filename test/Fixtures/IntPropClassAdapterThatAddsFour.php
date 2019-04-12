@@ -8,13 +8,13 @@ class IntPropClassAdapterThatAddsFour
     /**
      * @param StrictJson $delegate
      * @param array $parsed_json
-     * @return IntPropClass
+     * @return HasIntProp
      *
      * @throws JsonFormatException
      */
-    public function fromJson(StrictJson $delegate, array $parsed_json): IntPropClass
+    public function fromJson(StrictJson $delegate, array $parsed_json): HasIntProp
     {
         $original_number = $delegate->mapParsed($parsed_json['int_prop'], 'int');
-        return new IntPropClass($original_number + 4);
+        return new HasIntProp($original_number + 4);
     }
 }

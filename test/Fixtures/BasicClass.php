@@ -16,7 +16,7 @@ class BasicClass
     private $array_prop;
     /** @var int|null */
     private $nullable_int_prop;
-    /** @var IntPropClass */
+    /** @var HasIntProp */
     private $class_prop;
 
     public function __construct(
@@ -25,7 +25,7 @@ class BasicClass
         float $float_prop,
         bool $bool_prop,
         array $array_prop,
-        IntPropClass $class_prop,
+        HasIntProp $class_prop,
         ?int $nullable_int_prop = null
     ) {
         $this->string_prop = $string_prop;

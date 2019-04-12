@@ -200,7 +200,7 @@ class StrictJson
         if (!$this->typesAreCompatible($parameter, $value)) {
             $json_type = gettype($value);
             throw new JsonFormatException(
-                "{$parameter->getName()} has type {$parameter->getType()} in class but has type $json_type in json"
+                "Parameter \"{$parameter->getName()}\" has type \"{$parameter->getType()}\" in class but has type \"$json_type\" in JSON"
             );
         }
     }
@@ -295,7 +295,7 @@ class StrictJson
                 throw new InvalidConfigurationException("$classname::__construct has parameter named $parameter_name with no specified type");
             }
 
-            if (isset($parsed_json[$parameter_name])) {
+            if (array_key_exists($parameter_name, $parsed_json)) {
                 $value = $parsed_json[$parameter_name];
             } elseif ($parameter->isDefaultValueAvailable()) {
                 // Guaranteed not to throw because we checked in the if condition

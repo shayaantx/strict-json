@@ -2,7 +2,7 @@
 
 namespace Burba\StrictJson\Fixtures;
 
-class IntArrayPropClass
+class HasIntArrayProp
 {
     /** @var int[] */
     private $int_array_prop;

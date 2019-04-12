@@ -5,12 +5,13 @@ use Burba\StrictJson\Fixtures\AdapterThatThrowsRuntimeException;
 use Burba\StrictJson\Fixtures\AdapterWithoutFromJson;
 use Burba\StrictJson\Fixtures\AdapterWithWrongNumberOfArguments;
 use Burba\StrictJson\Fixtures\BasicClass;
-use Burba\StrictJson\Fixtures\ClassPropClass;
+use Burba\StrictJson\Fixtures\HasClassProp;
 use Burba\StrictJson\Fixtures\Example\User;
-use Burba\StrictJson\Fixtures\IntArrayPropClass;
-use Burba\StrictJson\Fixtures\IntPropClass;
+use Burba\StrictJson\Fixtures\HasIntArrayProp;
+use Burba\StrictJson\Fixtures\HasIntProp;
+use Burba\StrictJson\Fixtures\HasNullableProp;
 use Burba\StrictJson\Fixtures\IntPropClassAdapterThatAddsFour;
-use Burba\StrictJson\Fixtures\MissingConstructorClass;
+use Burba\StrictJson\Fixtures\MissingConstructor;
 use Burba\StrictJson\Fixtures\NoTypesInConstructor;
 use PHPUnit\Framework\TestCase;
 
@@ -42,7 +43,7 @@ class StrictJsonTest extends TestCase
                 1.2,
                 true,
                 [1, 2, 3],
-                new IntPropClass(5)
+                new HasIntProp(5)
             ),
             $mapper->map($json, BasicClass::class)
         );
@@ -56,15 +57,15 @@ class StrictJsonTest extends TestCase
         $json = '{ "int_array_prop": [1, 2, 3] }';
         $mapper = StrictJson::builder()
             ->addParameterAdapter(
-                IntArrayPropClass::class,
+                HasIntArrayProp::class,
                 'int_array_prop',
                 new ArrayAdapter('int')
             )
             ->build();
 
         $this->assertEquals(
-            new IntArrayPropClass([1, 2, 3]),
-            $mapper->map($json, IntArrayPropClass::class)
+            new HasIntArrayProp([1, 2, 3]),
+            $mapper->map($json, HasIntArrayProp::class)
         );
     }
 
@@ -74,13 +75,13 @@ class StrictJsonTest extends TestCase
     public function testClassAdapterForRootObject()
     {
         $mapper = StrictJson::builder()
-            ->addClassAdapter(IntPropClass::class, new IntPropClassAdapterThatAddsFour())
+            ->addClassAdapter(HasIntProp::class, new IntPropClassAdapterThatAddsFour())
             ->build();
 
         $json = '{ "int_prop": 1 }';
         $this->assertEquals(
-            new IntPropClass(5),
-            $mapper->map($json, IntPropClass::class)
+            new HasIntProp(5),
+            $mapper->map($json, HasIntProp::class)
         );
     }
 
@@ -90,13 +91,13 @@ class StrictJsonTest extends TestCase
     public function testClassAdapterForProperty()
     {
         $mapper = StrictJson::builder()
-            ->addClassAdapter(IntPropClass::class, new IntPropClassAdapterThatAddsFour())
+            ->addClassAdapter(HasIntProp::class, new IntPropClassAdapterThatAddsFour())
             ->build();
 
         $json = '{ "int_prop_class": { "int_prop": 1 } }';
         $this->assertEquals(
-            new ClassPropClass(new IntPropClass(5)),
-            $mapper->map($json, ClassPropClass::class)
+            new HasClassProp(new HasIntProp(5)),
+            $mapper->map($json, HasClassProp::class)
         );
     }
 
@@ -134,11 +135,11 @@ class StrictJsonTest extends TestCase
      */
     public function testInvalidClassAdapter($adapter, $expected_exception_message)
     {
-        $mapper = new StrictJson([IntPropClass::class => $adapter]);
+        $mapper = new StrictJson([HasIntProp::class => $adapter]);
         $json = '{"does_not": "matter"}';
         $this->expectException(InvalidConfigurationException::class);
         $this->expectExceptionMessage($expected_exception_message);
-        $mapper->map($json, IntPropClass::class);
+        $mapper->map($json, HasIntProp::class);
     }
 
     /**
@@ -149,10 +150,10 @@ class StrictJsonTest extends TestCase
      */
     public function testInvalidParameterAdapter($adapter)
     {
-        $mapper = new StrictJson([], [IntPropClass::class => ['int_prop' => $adapter]]);
+        $mapper = new StrictJson([], [HasIntProp::class => ['int_prop' => $adapter]]);
         $json = '{ "int_prop": 1 }';
         $this->expectException(InvalidConfigurationException::class);
-        $mapper->map($json, IntPropClass::class);
+        $mapper->map($json, HasIntProp::class);
     }
 
     /**
@@ -160,10 +161,10 @@ class StrictJsonTest extends TestCase
      */
     public function testClassAdapterThatThrowsJsonFormatException()
     {
-        $mapper = new StrictJson([IntPropClass::class => new AdapterThatThrowsJsonFormatException()]);
+        $mapper = new StrictJson([HasIntProp::class => new AdapterThatThrowsJsonFormatException()]);
         $json = '{"does_not": "matter"}';
         $this->expectException(JsonFormatException::class);
-        $mapper->map($json, IntPropClass::class);
+        $mapper->map($json, HasIntProp::class);
     }
 
     /**
@@ -176,7 +177,7 @@ class StrictJsonTest extends TestCase
         $mapper = new StrictJson();
         $json = '{"int_prop": "1"}';
         $this->expectException(JsonFormatException::class);
-        $mapper->map($json, IntPropClass::class);
+        $mapper->map($json, HasIntProp::class);
     }
 
     /**
@@ -200,7 +201,7 @@ class StrictJsonTest extends TestCase
         $mapper = new StrictJson();
         $json = '{"unknown_property": "value"}';
         $this->expectException(JsonFormatException::class);
-        $mapper->map($json, IntPropClass::class);
+        $mapper->map($json, HasIntProp::class);
     }
 
     /**
@@ -209,11 +210,11 @@ class StrictJsonTest extends TestCase
     public function testJsonHasWrongItemType()
     {
         $mapper = StrictJson::builder()
-            ->addParameterArrayAdapter(IntArrayPropClass::class, 'int_array_prop', 'int')
+            ->addParameterArrayAdapter(HasIntArrayProp::class, 'int_array_prop', 'int')
             ->build();
         $json = '{"int_array_prop": [1, "2", 3]}';
         $this->expectException(JsonFormatException::class);
-        $mapper->map($json, IntArrayPropClass::class);
+        $mapper->map($json, HasIntArrayProp::class);
     }
 
     /**
@@ -224,9 +225,47 @@ class StrictJsonTest extends TestCase
         $mapper = new StrictJson();
         $json = '{"does not": "mattter"}';
         $this->expectException(InvalidConfigurationException::class);
-        $classname = MissingConstructorClass::class;
+        $classname = MissingConstructor::class;
         $this->expectExceptionMessage("Type $classname does not have a valid constructor");
-        $mapper->map($json, MissingConstructorClass::class);
+        $mapper->map($json, MissingConstructor::class);
+    }
+
+    /**
+     * Verify that StrictJson throws an exception when an Adapter specifies a type but the JSON type doesn't match
+     *
+     * @throws JsonFormatException
+     */
+    public function testMismatchedAdapterParameterJsonField()
+    {
+        $mapper = new StrictJson([HasIntProp::class => new IntPropClassAdapterThatAddsFour()]);
+        $json = '{"int_prop_class": 4}';
+        $this->expectException(JsonFormatException::class);
+        $this->expectExceptionMessage('Parameter "parsed_json" has type "array" in class but has type "integer" in JSON');
+        $mapper->map($json, HasClassProp::class);
+    }
+
+    /**
+     * @throws JsonFormatException
+     */
+    public function testNullableParameterWithNullValue()
+    {
+        $mapper = new StrictJson();
+        $json = '{"nullable_prop": null}';
+        $this->assertEquals(
+            new HasNullableProp(null),
+            $mapper->map($json, HasNullableProp::class)
+        );
+    }
+
+    /**
+     * @throws JsonFormatException
+     */
+    public function testNullValueForNonNullableParameter()
+    {
+        $mapper = new StrictJson();
+        $json = '{"int_prop": null}';
+        $this->expectException(JsonFormatException::class);
+        $mapper->map($json, HasIntProp::class);
     }
 
     public function invalidAdapterProvider()
