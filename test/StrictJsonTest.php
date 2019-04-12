@@ -201,6 +201,8 @@ class StrictJsonTest extends TestCase
         $mapper = new StrictJson();
         $json = '{"unknown_property": "value"}';
         $this->expectException(JsonFormatException::class);
+        $classname = HasIntProp::class;
+        $this->expectExceptionMessage("{$classname}::__construct has non-optional parameter named int_prop that does not exist in JSON");
         $mapper->map($json, HasIntProp::class);
     }
 
