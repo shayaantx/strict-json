@@ -1,4 +1,4 @@
-<?php namespace Burba\StrictJson\Fixtures\Example;
+<?php namespace Burba\StrictJson\Fixtures\Docs;
 
 use Burba\StrictJson\StrictJson;
 

@@ -5,7 +5,6 @@ use Burba\StrictJson\Fixtures\AdapterThatThrowsRuntimeException;
 use Burba\StrictJson\Fixtures\AdapterWithoutFromJson;
 use Burba\StrictJson\Fixtures\AdapterWithWrongNumberOfArguments;
 use Burba\StrictJson\Fixtures\BasicClass;
-use Burba\StrictJson\Fixtures\Example\User;
 use Burba\StrictJson\Fixtures\HasClassProp;
 use Burba\StrictJson\Fixtures\HasIntArrayProp;
 use Burba\StrictJson\Fixtures\HasIntProp;
@@ -106,7 +105,7 @@ class StrictJsonTest extends TestCase
         $json = '{ invalid';
         $this->expectException(JsonFormatException::class);
         $this->expectExceptionMessage("Unable to parse invalid JSON (Syntax error): $json");
-        $mapper->map($json, User::class);
+        $mapper->map($json, HasIntProp::class);
     }
 
     /**
@@ -141,6 +140,7 @@ class StrictJsonTest extends TestCase
     /**
      * Verify that passing invalid values in for parameter adapters always throws a config exception
      *
+     * @param $adapter
      * @throws JsonFormatException
      * @dataProvider invalidAdapterProvider
      */

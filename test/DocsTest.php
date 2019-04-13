@@ -1,17 +1,19 @@
 <?php namespace Burba\StrictJson;
 
-use Burba\StrictJson\Fixtures\Example\Address;
-use Burba\StrictJson\Fixtures\Example\DateAdapter;
-use Burba\StrictJson\Fixtures\Example\Event;
-use Burba\StrictJson\Fixtures\Example\LenientBooleanAdapter;
-use Burba\StrictJson\Fixtures\Example\User;
+use Burba\StrictJson\Fixtures\Docs\Address;
+use Burba\StrictJson\Fixtures\Docs\DateAdapter;
+use Burba\StrictJson\Fixtures\Docs\Event;
+use Burba\StrictJson\Fixtures\Docs\LenientBooleanAdapter;
+use Burba\StrictJson\Fixtures\Docs\ModelWithNullableParam;
+use Burba\StrictJson\Fixtures\Docs\ModelWithOptionalParam;
+use Burba\StrictJson\Fixtures\Docs\User;
 use DateTime;
 use PHPUnit\Framework\TestCase;
 
 /**
  * Suite of tests that verify that the Readme examples work
  */
-class ReadmeTest extends TestCase
+class DocsTest extends TestCase
 {
     /**
      * @throws JsonFormatException
@@ -39,7 +41,7 @@ class ReadmeTest extends TestCase
     /**
      * @throws JsonFormatException
      */
-    public function testAdapterExample()
+    public function testClassAdapterExample()
     {
         $json = '
         {
@@ -57,7 +59,7 @@ class ReadmeTest extends TestCase
     /**
      * @throws JsonFormatException
      */
-    public function testReadmeParameterAdapterExample()
+    public function testParameterAdapterExample()
     {
         $json = '
         {
@@ -80,7 +82,7 @@ class ReadmeTest extends TestCase
     /**
      * @throws JsonFormatException
      */
-    public function testReadmeArrayAdapterExample()
+    public function testArrayAdapterExample()
     {
         $json = '
         {
@@ -110,5 +112,30 @@ class ReadmeTest extends TestCase
             'Dinner party for Bob',
             $user->getEventsAttended()[0]->getName()
         );
+    }
+
+    /**
+     * @throws JsonFormatException
+     */
+    public function testOptionalParamExample()
+    {
+        $mapper = new StrictJson();
+        $model = $mapper->map('{}', ModelWithOptionalParam::class);
+        $this->assertEquals(
+            'default',
+            $model->getOptionalParam()
+        );
+    }
+
+    /**
+     * @throws JsonFormatException
+     */
+    public function testNullableParamExample()
+    {
+        $json = '{"nullable_param": null}';
+        $mapper = new StrictJson();
+        $model = $mapper->map($json, ModelWithNullableParam::class);
+        $message = is_null($model->getNullableParam()) ? 'Param is null' : 'Param is not null';
+        $this->assertEquals('Param is null', $message);
     }
 }
