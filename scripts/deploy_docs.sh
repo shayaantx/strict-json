@@ -5,13 +5,13 @@ branch=${CIRCLE_BRANCH:-$(git symbolic-ref --short -q HEAD)}
 repository=https://${GITHUB_TOKEN}@github.com/sburba/strict-json
 
 if [[ ! -z ${CIRCLE_PULL_REQUEST:-} ]]; then
-    echo "Skipping docs deploy, PR branch";
-    exit 0;
+    echo "Skipping docs deploy, PR branch"
+    exit 0
 fi
 
 if [[ ! ${branch} == 'master' ]]; then
-    echo "Skipping docs deploy, non master branch";
-    exit 0;
+    echo "Skipping docs deploy, non master branch"
+    exit 0
 fi
 
 if [[ ! -z ${CI} ]]; then
