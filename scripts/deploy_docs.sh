@@ -23,6 +23,5 @@ mkdir -p ~/.ssh/
 touch ~/.ssh/known_hosts
 ssh-keyscan -H github.com 2>/dev/null >> ~/.ssh/known_hosts
 
-# Couscous really likes to log the access token, so redirect all output to /dev/null
-vendor/bin/couscous deploy --repository "${repository}" &> /dev/null
-echo "Deployed Docs"
+# Couscous really likes to log the access token, so sanitize the output
+vendor/bin/couscous deploy --repository "${repository}" 2>&1 | sed "s/${GITHUB_TOKEN}/<redacted>/g"
