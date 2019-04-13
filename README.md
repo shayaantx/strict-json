@@ -1,5 +1,5 @@
 # StrictJson
 
-This README contains documentation for developing with StrictJson, if you're looking for user documentation, check here.
+StrictJson converts JSON into your plain old PHP classes
 
-#
+View the user documentation at https://sburba.github.io/strict-json/

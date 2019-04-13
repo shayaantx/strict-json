@@ -1,6 +1,9 @@
 version: 2
 jobs:
   build:
+    branches:
+      ignore:
+        - gh-pages
     docker:
       - image: "circleci/php:7.3-cli"
     steps:
@@ -32,3 +35,6 @@ jobs:
       - run:
           name: Upload Coverage Report
           command: "bash <(curl -s https://codecov.io/bash)"
+      - run:
+          name: Update Documentation
+          command: "./scripts/deploy_docs.sh"
