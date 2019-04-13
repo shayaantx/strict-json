@@ -1,0 +1,7 @@
+include:
+  - docs
+template:
+  url: https://github.com/moqmar/mintlook-couscous
+
+# Template args
+title: StrictJson
