@@ -14,7 +14,7 @@ if [[ ! ${branch} == 'master' ]]; then
     exit 0
 fi
 
-if [[ ! -z ${CI} ]]; then
+if [[ ! -z ${CI:-} ]]; then
     git config --global user.name "CI AutoDeploy"
     git config --global user.email "autodeploy@samburba.com"
 fi
