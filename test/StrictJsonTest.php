@@ -318,6 +318,19 @@ class StrictJsonTest extends TestCase
         $mapper->map($json, BasicClass::class);
     }
 
+    /**
+     * @throws JsonFormatException
+     */
+    public function testDeprecatedMapParsedFunction()
+    {
+        $mapper = new StrictJson();
+        /** @noinspection PhpDeprecationInspection */
+        $this->assertEquals(
+            new HasIntProp(1),
+            $mapper->mapParsed(['int_prop' => 1], HasIntProp::class)
+        );
+    }
+
     public function invalidAdapterProvider()
     {
         return [

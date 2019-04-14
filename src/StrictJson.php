@@ -80,11 +80,14 @@ class StrictJson
             );
         }
 
-        return $this->mapParsed($parsed, $class);
+        return $this->mapDecoded($parsed, $class);
     }
 
     /**
      * Convert decoded json into an instance of the given target type
+     *
+     * @deprecated Use StrictJson::mapDecoded instead, this method will go away in the next breaking change version
+     * @see StrictJson::mapDecoded()
      *
      * @param mixed $parsed_json An associative array or other primitive
      * @param string $target_type Either a class name or a scalar name (i.e. string, int, float, bool)
@@ -95,20 +98,35 @@ class StrictJson
      */
     public function mapParsed($parsed_json, string $target_type, ?JsonContext $context = null)
     {
+        return $this->mapDecoded($parsed_json, $target_type, $context);
+    }
+
+    /**
+     * Convert decoded json into an instance of the given target type
+     *
+     * @param mixed $decoded_json An associative array or other primitive
+     * @param string $target_type Either a class name or a scalar name (i.e. string, int, float, bool)
+     * @param JsonContext $context The current parsing context, or null if being called at the root of the decoded JSON
+     *
+     * @return mixed
+     * @throws JsonFormatException
+     */
+    public function mapDecoded($decoded_json, string $target_type, ?JsonContext $context = null)
+    {
         $context = $context ?? JsonContext::root();
         $target_type = $this->normalize($target_type);
 
         $adapter = $this->type_adapters[$target_type] ?? null;
         if ($adapter !== null) {
-            return $this->mapWithAdapter($adapter, $parsed_json, $context);
+            return $this->mapWithAdapter($adapter, $decoded_json, $context);
         }
 
         if ($this->isScalarTypeName($target_type)) {
-            return $this->mapScalar($parsed_json, $target_type, $context);
+            return $this->mapScalar($decoded_json, $target_type, $context);
         }
 
         if (class_exists($target_type)) {
-            return $this->mapClass($parsed_json, $target_type, $context);
+            return $this->mapClass($decoded_json, $target_type, $context);
         }
 
         throw new InvalidConfigurationException("Target type \"$target_type\" is not a scalar type or valid class and has no registered type adapter");
@@ -355,7 +373,7 @@ class StrictJson
             }
 
             if (!$parameter->getType()->isBuiltin() && $value !== null) {
-                $value = $this->mapParsed(
+                $value = $this->mapDecoded(
                     $value,
                     $parameter->getType()->getName(),
                     $context->withProperty($parameter_name)
