@@ -24,4 +24,6 @@ touch ~/.ssh/known_hosts
 ssh-keyscan -H github.com 2>/dev/null >> ~/.ssh/known_hosts
 
 # Couscous really likes to log the access token, so sanitize the output
-vendor/bin/couscous deploy --repository "${repository}" 2>&1 | sed "s/${GITHUB_TOKEN}/<redacted>/g"
+# Couscous deploy also fails if there are no changed files, so keep that from failing the build until
+# https://github.com/CouscousPHP/Couscous/pull/232 is merged
+vendor/bin/couscous deploy --repository "${repository}" 2>&1 | sed "s/${GITHUB_TOKEN}/<redacted>/g" || true
