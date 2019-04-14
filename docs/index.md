@@ -306,12 +306,29 @@ that does the validation, or you can just validate in the constructor of your mo
 model constructor will be re-thrown by StrictJson when it attempts to map. Validation in your constructor has the
 additional benefit of validating your models even when you're not using StrictJson.
 
-# Errors
+# Exceptions
 
+## JsonFormatException
 If the JSON is invalid, is missing required fields specified by your model constructor, or has fields which don't match
 the types of your model constructor, StrictJson will throw a `JsonFormatException`, to indicate that the JSON was not
-formatted as you expected.
+formatted as you expected. `JsonFormatException` messages will also include a full path to the place in the JSON that
+is causing the error, which looks like this (if expecting an `int` array in position `$.a.b`):
 
+JSON:
+```json
+{
+  "a": {
+    "b": [1, "two", 3]
+  }
+}
+```
+
+Error:
+```
+Value is of type string, expected type int at path $.a.b[1]
+```
+
+## InvalidConfigurationException
 If StrictJson is configured incorrectly, either by mapping to a class that doesn't have a constructor, or providing
 adapters that don't have fromJson methods, it will throw `InvalidConfigurationException`. StrictJson does not validate
 adapters until it actually uses them for performance reasons, so InvalidConfigurationException may be thrown later than
