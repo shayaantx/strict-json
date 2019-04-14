@@ -339,7 +339,7 @@ class StrictJsonTest extends TestCase
             ],
             'Adapter with wrong context argument' => [
                 new AdapterWithWrongContextArgument(),
-                "third argument must be of type Burba\StrictJson\StrictJson",
+                "third argument must be of type Burba\StrictJson\JsonContext",
             ],
             'Adapter that is secretly a number' => [
                 2,

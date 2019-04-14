@@ -194,7 +194,7 @@ class StrictJson
             $this->requireCompatibleTypes($adapter_method_params[1], $value, $context);
         }
         if ($param_count > 2 && !$this->typesAreCompatible($adapter_method_params[2], $context)) {
-            $required_class = StrictJson::class;
+            $required_class = JsonContext::class;
             throw new InvalidConfigurationException(
                 "Adapter {$adapter_class->getName()}'s fromJson method's third argument must be of type $required_class"
             );
