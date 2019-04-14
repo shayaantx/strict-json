@@ -6,3 +6,7 @@ template:
 # Template args
 title: StrictJson
 baseUrl: https://sburba.github.io/strict-json
+defaultLanguage: world
+sidebar:
+  - text: GitHub Repo
+    link: https://github.com/sburba/strict-json

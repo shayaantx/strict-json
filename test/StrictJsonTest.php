@@ -1,15 +1,18 @@
 <?php namespace Burba\StrictJson;
 
-use Burba\StrictJson\Fixtures\AdapterThatThrowsJsonFormatException;
-use Burba\StrictJson\Fixtures\AdapterThatThrowsRuntimeException;
-use Burba\StrictJson\Fixtures\AdapterWithoutFromJson;
-use Burba\StrictJson\Fixtures\AdapterWithWrongNumberOfArguments;
 use Burba\StrictJson\Fixtures\BasicClass;
 use Burba\StrictJson\Fixtures\HasClassProp;
 use Burba\StrictJson\Fixtures\HasIntArrayProp;
 use Burba\StrictJson\Fixtures\HasIntProp;
 use Burba\StrictJson\Fixtures\HasNullableProp;
 use Burba\StrictJson\Fixtures\IntPropClassAdapterThatAddsFour;
+use Burba\StrictJson\Fixtures\InvalidAdapters\AdapterThatThrowsJsonFormatException;
+use Burba\StrictJson\Fixtures\InvalidAdapters\AdapterThatThrowsRuntimeException;
+use Burba\StrictJson\Fixtures\InvalidAdapters\AdapterWithoutFromJson;
+use Burba\StrictJson\Fixtures\InvalidAdapters\AdapterWithTooFewArguments;
+use Burba\StrictJson\Fixtures\InvalidAdapters\AdapterWithTooManyArguments;
+use Burba\StrictJson\Fixtures\InvalidAdapters\AdapterWithWrongDelegateArgument;
+use Burba\StrictJson\Fixtures\InvalidAdapters\AdapterWithWrongContextArgument;
 use Burba\StrictJson\Fixtures\MissingConstructor;
 use Burba\StrictJson\Fixtures\NoTypesInConstructor;
 use PHPUnit\Framework\TestCase;
@@ -266,16 +269,77 @@ class StrictJsonTest extends TestCase
         $mapper->map($json, HasIntProp::class);
     }
 
+    /**
+     * @throws JsonFormatException
+     */
+    public function testMissingPropertyInNestedClass()
+    {
+        $json = '
+        {
+            "string_prop": "string_value",
+            "int_prop": 1,
+            "float_prop": 1.2,
+            "bool_prop": true,
+            "array_prop": [1, 2, 3],
+            "class_prop": {
+            }
+        }
+        ';
+
+        $mapper = new StrictJson();
+        $this->expectException(JsonFormatException::class);
+        $this->expectExceptionMessage('Burba\StrictJson\Fixtures\HasIntProp::__construct has non-optional parameter named int_prop that does not exist in JSON at path $.class_prop');
+        $mapper->map($json, BasicClass::class);
+    }
+
+    /**
+     * @throws JsonFormatException
+     */
+    public function testMissingPropertyInNestedArray()
+    {
+        $json = '
+        {
+            "string_prop": "string_value",
+            "int_prop": 1,
+            "float_prop": 1.2,
+            "bool_prop": true,
+            "array_prop": [1, "two", 3],
+            "class_prop": {
+                "int_prop": 1
+            }
+        }
+        ';
+
+        $mapper = StrictJson::builder()
+            ->addParameterArrayAdapter(BasicClass::class, 'array_prop', 'int')
+            ->build();
+        $this->expectException(JsonFormatException::class);
+        $this->expectExceptionMessage('Value is of type string, expected type int at path $.array_prop[1]');
+        $mapper->map($json, BasicClass::class);
+    }
+
     public function invalidAdapterProvider()
     {
         return [
             'Adapter with no fromJson method' => [
                 new AdapterWithoutFromJson(),
-                'Adapter Burba\StrictJson\Fixtures\AdapterWithoutFromJson has no fromJson method',
+                'has no fromJson method',
             ],
-            'Adapter with wrong number of arguments' => [
-                new AdapterWithWrongNumberOfArguments(),
-                "Adapter Burba\StrictJson\Fixtures\AdapterWithWrongNumberOfArguments's fromJson method has the wrong number of parameters, needs exactly 2'",
+            'Adapter with too few arguments' => [
+                new AdapterWithTooFewArguments(),
+                "method has the wrong number of parameters, needs either two or three",
+            ],
+            'Adapter with too many arguments' => [
+                new AdapterWithTooManyArguments(),
+                "method has the wrong number of parameters, needs either two or three",
+            ],
+            'Adapter with wrong delegate argument' => [
+                new AdapterWithWrongDelegateArgument(),
+                "first argument must be of type Burba\StrictJson\StrictJson",
+            ],
+            'Adapter with wrong context argument' => [
+                new AdapterWithWrongContextArgument(),
+                "third argument must be of type Burba\StrictJson\JsonContext",
             ],
             'Adapter that is secretly a number' => [
                 2,
@@ -283,7 +347,7 @@ class StrictJsonTest extends TestCase
             ],
             'Adapter than throws a runtime exception' => [
                 new AdapterThatThrowsRuntimeException(),
-                "Adapter Burba\StrictJson\Fixtures\AdapterThatThrowsRuntimeException threw an exception",
+                "threw an exception",
             ],
         ];
     }

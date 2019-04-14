@@ -2,6 +2,8 @@
 
 use Burba\StrictJson\Fixtures\Docs\Address;
 use Burba\StrictJson\Fixtures\Docs\DateAdapter;
+use Burba\StrictJson\Fixtures\Docs\ErrorPathExampleA;
+use Burba\StrictJson\Fixtures\Docs\ErrorPathExampleRoot;
 use Burba\StrictJson\Fixtures\Docs\Event;
 use Burba\StrictJson\Fixtures\Docs\LenientBooleanAdapter;
 use Burba\StrictJson\Fixtures\Docs\ModelWithNullableParam;
@@ -137,5 +139,27 @@ class DocsTest extends TestCase
         $model = $mapper->map($json, ModelWithNullableParam::class);
         $message = is_null($model->getNullableParam()) ? 'Param is null' : 'Param is not null';
         $this->assertEquals('Param is null', $message);
+    }
+
+    /**
+     * @throws JsonFormatException
+     */
+    public function testErrorPathExample()
+    {
+        $json = '
+        {
+          "a": {
+            "b": [1, "two", 3]
+          }
+        }
+        ';
+
+        $mapper = StrictJson::builder()
+            ->addParameterArrayAdapter(ErrorPathExampleA::class, 'b', 'int')
+            ->build();
+
+        $this->expectException(JsonFormatException::class);
+        $this->expectExceptionMessage('Value is of type string, expected type int at path $.a.b[1]');
+        $mapper->map($json, ErrorPathExampleRoot::class);
     }
 }

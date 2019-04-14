@@ -1,4 +1,5 @@
 # StrictJson
+[![Coverage](https://img.shields.io/codecov/c/github/sburba/strict-json.svg)](https://codecov.io/gh/sburba/strict-json)
 
 StrictJson converts JSON into your plain old PHP classes
 

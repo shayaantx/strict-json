@@ -1,4 +1,4 @@
-<?php namespace Burba\StrictJson\Fixtures;
+<?php namespace Burba\StrictJson\Fixtures\InvalidAdapters;
 
 use Burba\StrictJson\StrictJson;
 use RuntimeException;

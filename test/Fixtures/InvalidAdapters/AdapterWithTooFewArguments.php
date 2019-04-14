@@ -1,8 +1,8 @@
-<?php namespace Burba\StrictJson\Fixtures;
+<?php namespace Burba\StrictJson\Fixtures\InvalidAdapters;
 
 use Burba\StrictJson\StrictJson;
 
-class AdapterWithWrongNumberOfArguments
+class AdapterWithTooFewArguments
 {
     public function fromJson(/** @noinspection PhpUnusedParameterInspection */ StrictJson $delegate): ?string
     {
