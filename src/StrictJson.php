@@ -87,25 +87,28 @@ class StrictJson
      * Convert decoded json into an instance of the given target type
      *
      * @param mixed $parsed_json An associative array or other primitive
-     * @param string $target_type
+     * @param string $target_type Either a class name or a scalar name (i.e. string, int, float, bool)
+     * @param JsonContext $context The current parsing context, or null if being called at the root of the decoded JSON
+     *
      * @return mixed
      * @throws JsonFormatException
      */
-    public function mapParsed($parsed_json, string $target_type)
+    public function mapParsed($parsed_json, string $target_type, ?JsonContext $context = null)
     {
+        $context = $context ?? JsonContext::root();
         $target_type = $this->normalize($target_type);
 
         $adapter = $this->type_adapters[$target_type] ?? null;
         if ($adapter !== null) {
-            return $this->mapWithAdapter($adapter, $parsed_json);
+            return $this->mapWithAdapter($adapter, $parsed_json, $context);
         }
 
         if ($this->isScalarTypeName($target_type)) {
-            return $this->mapScalar($parsed_json, $target_type);
+            return $this->mapScalar($parsed_json, $target_type, $context);
         }
 
         if (class_exists($target_type)) {
-            return $this->mapClass($parsed_json, $target_type);
+            return $this->mapClass($parsed_json, $target_type, $context);
         }
 
         throw new InvalidConfigurationException("Target type \"$target_type\" is not a scalar type or valid class and has no registered type adapter");
@@ -141,12 +144,15 @@ class StrictJson
      *
      * @param object $adapter Object with a fromJson method
      * @param string|int|array|bool|float $value The decoded json value to adapt
+     * @param JsonContext $context The current decoding context
      *
      * @return mixed Whatever the adapter returns
      * @throws JsonFormatException If the provided value doesn't match the value the adapter expects
      */
-    private function mapWithAdapter($adapter, $value)
+    private function mapWithAdapter($adapter, $value, JsonContext $context)
     {
+        $context = $context ?? JsonContext::root();
+
         try {
             $adapter_class = new ReflectionClass($adapter);
         } catch (ReflectionException $e) {
@@ -167,22 +173,37 @@ class StrictJson
         }
 
         $adapter_method_params = $adapter_method->getParameters();
-        if (count($adapter_method_params) !== 2) {
+        $param_count = count($adapter_method_params);
+        if ($param_count < 2 || $param_count > 3) {
             throw new InvalidConfigurationException(
-                "Adapter {$adapter_class->getName()}'s fromJson method has the wrong number of parameters, needs exactly 2'"
+                "Adapter {$adapter_class->getName()}'s fromJson method has the wrong number of parameters, needs either two or three"
             );
         }
 
         $parsed_json_param = $adapter_method_params[1];
+
+        if (!$this->typesAreCompatible($adapter_method_params[0], $this)) {
+            $required_class = StrictJson::class;
+            throw new InvalidConfigurationException(
+                "Adapter {$adapter_class->getName()}'s fromJson method's first argument must be of type $required_class"
+            );
+        }
         // If the adapter specifies a required type, make sure the json value matches it. But if no type is specified,
         // allow the adapter to handle all values
         if ($parsed_json_param->getType() !== null) {
-            $this->requireCompatibleTypes($adapter_method_params[1], $value);
+            $this->requireCompatibleTypes($adapter_method_params[1], $value, $context);
         }
+        if ($param_count > 2 && !$this->typesAreCompatible($adapter_method_params[2], $context)) {
+            $required_class = StrictJson::class;
+            throw new InvalidConfigurationException(
+                "Adapter {$adapter_class->getName()}'s fromJson method's third argument must be of type $required_class"
+            );
+        }
+
         try {
-            return $adapter_method->invoke($adapter, $this, $value);
+            return $adapter_method->invokeArgs($adapter, [$this, $value, $context]);
         } /** @noinspection PhpRedundantCatchClauseInspection */ catch (JsonFormatException $e) {
-            throw new JsonFormatException("Adapter {$adapter_class->getName()} was unable to adapt the parsed json", $e);
+            throw $e;
         } catch (Exception $e) {
             throw new InvalidConfigurationException("Adapter {$adapter_class->getName()} threw an exception", $e);
         }
@@ -193,14 +214,18 @@ class StrictJson
      *
      * @param ReflectionParameter $parameter
      * @param mixed $value
+     * @param JsonContext $context
+     *
      * @throws JsonFormatException
      */
-    private function requireCompatibleTypes(ReflectionParameter $parameter, $value): void
+    private function requireCompatibleTypes(ReflectionParameter $parameter, $value, JsonContext $context): void
     {
         if (!$this->typesAreCompatible($parameter, $value)) {
             $json_type = gettype($value);
             throw new JsonFormatException(
-                "Parameter \"{$parameter->getName()}\" has type \"{$parameter->getType()}\" in class but has type \"$json_type\" in JSON"
+                "Parameter \"{$parameter->getName()}\" has type \"{$parameter->getType()}\" in class but has type \"$json_type\" in JSON",
+                null,
+                $context
             );
         }
     }
@@ -227,15 +252,21 @@ class StrictJson
         $parameter_type_name = $this->normalize($parameter->getType()->getName());
         $json_type_name = $this->normalize(gettype($value));
 
-        if ($parameter_type_name === $json_type_name) {
+        if ($this->isOfType($value, $parameter_type_name)) {
             return true;
         } elseif ($parameter->allowsNull() && $json_type_name === 'NULL') {
-            return true;
-        } elseif (is_object($value) && $parameter->getType()->getName() == get_class($value)) {
             return true;
         } else {
             return false;
         }
+    }
+
+    private function isOfType($value, string $type)
+    {
+        $value_type = $this->normalize(gettype($value));
+        $type = $this->normalize($type);
+
+        return $type === $value_type || (is_object($value) && get_class($value) === $type);
     }
 
     /**
@@ -250,16 +281,18 @@ class StrictJson
     /**
      * @param $parsed_json
      * @param string $target_type
+     * @param JsonContext $context
+     *
      * @return mixed
      * @throws JsonFormatException
      */
-    private function mapScalar($parsed_json, string $target_type)
+    private function mapScalar($parsed_json, string $target_type, JsonContext $context)
     {
         $json_type = $this->normalize(gettype($parsed_json));
         if ($json_type === $target_type) {
             return $parsed_json;
         } else {
-            throw new JsonFormatException("Value is of type $json_type, expected type $target_type");
+            throw new JsonFormatException("Value is of type $json_type, expected type $target_type", null, $context);
         }
     }
 
@@ -267,10 +300,12 @@ class StrictJson
     /**
      * @param $parsed_json
      * @param string $classname
+     * @param JsonContext $context
+     *
      * @return object
      * @throws JsonFormatException
      */
-    private function mapClass($parsed_json, string $classname): object
+    private function mapClass($parsed_json, string $classname, JsonContext $context): object
     {
         try {
             $class = new ReflectionClass($classname);
@@ -302,13 +337,13 @@ class StrictJson
                 /** @noinspection PhpUnhandledExceptionInspection */
                 $value = $parameter->getDefaultValue();
             } else {
-                throw new JsonFormatException("$classname::__construct has non-optional parameter named $parameter_name that does not exist in JSON");
+                throw new JsonFormatException("$classname::__construct has non-optional parameter named $parameter_name that does not exist in JSON", null, $context);
             }
 
             $adapter = $this->parameter_adapters[$classname][$parameter_name] ?? null;
             if ($adapter !== null) {
                 try {
-                    $value = $this->mapWithAdapter($adapter, $value);
+                    $value = $this->mapWithAdapter($adapter, $value, $context->withProperty($parameter_name));
                 } catch (InvalidConfigurationException $e) {
                     if (is_object($adapter)) {
                         $adapter_description = get_class($adapter);
@@ -320,10 +355,14 @@ class StrictJson
             }
 
             if (!$parameter->getType()->isBuiltin() && $value !== null) {
-                $value = $this->mapParsed($value, $parameter->getType()->getName());
+                $value = $this->mapParsed(
+                    $value,
+                    $parameter->getType()->getName(),
+                    $context->withProperty($parameter_name)
+                );
             }
 
-            $this->requireCompatibleTypes($parameter, $value);
+            $this->requireCompatibleTypes($parameter, $value, $context->withProperty($parameter_name));
             $constructor_args[] = $value;
         }
 
