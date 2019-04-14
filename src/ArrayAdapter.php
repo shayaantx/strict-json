@@ -32,7 +32,7 @@ class ArrayAdapter
         $context = $context ?? JsonContext::root();
         $mapped_items = [];
         foreach ($items as $idx => $item) {
-            $mapped_items[] = $delegate->mapParsed($item, $this->item_type, $context->withArrayIndex($idx));
+            $mapped_items[] = $delegate->mapDecoded($item, $this->item_type, $context->withArrayIndex($idx));
         }
         return $mapped_items;
     }

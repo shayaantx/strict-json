@@ -14,7 +14,7 @@ class IntPropClassAdapterThatAddsFour
      */
     public function fromJson(StrictJson $delegate, array $parsed_json): HasIntProp
     {
-        $original_number = $delegate->mapParsed($parsed_json['int_prop'], 'int');
+        $original_number = $delegate->mapDecoded($parsed_json['int_prop'], 'int');
         return new HasIntProp($original_number + 4);
     }
 }
