@@ -19,7 +19,7 @@ For example, given the the JSON
 ```
 And these classes:
 ```php
-<?php
+<?php declare(strict_types=1);
 class Address {
     private $street;
     private $zip_code;
@@ -49,7 +49,7 @@ class User {
 
 This code:
 ```php
-<?php
+<?php declare(strict_types=1);
 $mapper = new StrictJson();
 $user = $mapper->map($json, User::class);
 var_dump($user);
@@ -79,7 +79,7 @@ JSON.
 
 Here's a minimal example:
 ```php
-<?php
+<?php declare(strict_types=1);
 use Burba\StrictJson\StrictJson;
 
 class ModelWithOptionalParam
@@ -104,7 +104,7 @@ echo $model->getOptionalParam();
 If your constructor parameter has a nullable type, StrictJson will allow the JSON fields to be null as well.
 Here's a minimal example:
 ```php
-<?php
+<?php declare(strict_types=1);
 use Burba\StrictJson\StrictJson;
 
 class ModelWithNullableParam
@@ -130,16 +130,9 @@ echo $message;
 
 # Custom Mapping
 
-You can customize how StrictJson turns JSON into your models by creating and registering a model.
-
-An adapter is a regular PHP class that contains exactly two parameters:
-1. A StrictJson instance. This can be used when you want to decode a portion of the 
-2. The decoded JSON value that you expect for your class. If you add a type to this parameter, StrictJson will validate
-that the type in the JSON matches your expected type before invoking your adapter.
-
-And returns an instantiated instance of the desired target type.
-
-See below for the different kinds of adapters and how to configure them.
+To customize how StrictJson turns JSON into your models, create a class that implements `Burba\StrictJson\Adapter` and
+register it for a class or parameter when creating StrictJson. See below for examples of the different types of
+adapters.
 
 ## Class Adapters
 
@@ -148,19 +141,32 @@ case, you can write a custom adapter to tell StrictJson how to parse that parame
 
 For example, you can create a custom class adapter like this:
 ```php
-<?php
-class DateAdapter
+<?php declare(strict_types=1);
+use Burba\StrictJson\Adapter;
+use Burba\StrictJson\JsonContext;
+use Burba\StrictJson\StrictJson;
+use Burba\StrictJson\Type;
+
+class DateAdapter implements Adapter
 {
-    public function fromJson(StrictJson $delegate, string $parsed_json): DateTime
+    public function fromJson($decoded_json, StrictJson $delegate, JsonContext $context): DateTime
     {
-        return DateTime::createFromFormat(DateTime::ISO8601, $parsed_json);
+        return DateTime::createFromFormat(DateTime::ISO8601, $decoded_json);
+    }
+
+    /**
+     * @return Type[]
+     */
+    public function fromTypes(): array
+    {
+        return [Type::string()];
     }
 }
 ```
 
 And use it like this:
 ```php
-<?php
+<?php declare(strict_types=1);
 use Burba\StrictJson\Fixtures\Docs\DateAdapter;
 use Burba\StrictJson\StrictJson;
 
@@ -200,18 +206,29 @@ echo $event->getDate()->format("y");
 If you only want to map a single parameter of a class, you can use a parameter adapter:
 
 ```php
-<?php
-use Burba\StrictJson\StrictJson;
-use Burba\StrictJson\Fixtures\Docs\DateAdapter;
+<?php declare(strict_types=1);
+use Burba\StrictJson\Adapter;
 use Burba\StrictJson\Fixtures\Docs\Event;
+use Burba\StrictJson\JsonContext;
+use Burba\StrictJson\StrictJson;
+use Burba\StrictJson\Type;
+use Burba\StrictJson\Fixtures\Docs\DateAdapter;
 
 // Create your adapter as normal
-class LenientBooleanAdapter
+class LenientBooleanAdapter implements Adapter
 {
-    // Omitting type in $parsed_value parameter, because we want to accept any JSON type
-    public function fromJson(StrictJson $delegate, $parsed_value): bool
+    public function fromJson($decoded_value, StrictJson $delegate, JsonContext $context): bool
     {
-        return (bool)$parsed_value;
+        return (bool)$decoded_value;
+    }
+
+    /** @return Type[] */
+    public function fromTypes(): array
+    {
+        return [
+            Type::int(),
+            Type::bool(),
+        ];
     }
 }
 
@@ -241,11 +258,13 @@ If your class contains arrays, you'll need to tell StrictJson the expected array
 those for you as well.
 
 ```php
-<?php
+<?php declare(strict_types=1);
 use Burba\StrictJson\Fixtures\Docs\Address;
 use Burba\StrictJson\Fixtures\Docs\Event;
 use Burba\StrictJson\StrictJson;
 use Burba\StrictJson\Fixtures\Docs\DateAdapter;
+use Burba\StrictJson\Type;
+
 
 // User class with array of events
 class User
@@ -290,7 +309,7 @@ $json = '
 $mapper = StrictJson::builder()
     ->addClassAdapter(DateTime::class, new DateAdapter())
     // Tell the mapper the events_attended parameter in the User class is an array of Events
-    ->addParameterArrayAdapter(User::class, 'events_attended', Event::class)
+    ->addParameterArrayAdapter(User::class, 'events_attended', Type::ofClass(Event::class))
     ->build();
 
 
@@ -329,7 +348,6 @@ Value is of type string, expected type int at path $.a.b[1]
 ```
 
 ## InvalidConfigurationException
-If StrictJson is configured incorrectly, either by mapping to a class that doesn't have a constructor, or providing
-adapters that don't have fromJson methods, it will throw `InvalidConfigurationException`. StrictJson does not validate
-adapters until it actually uses them for performance reasons, so InvalidConfigurationException may be thrown later than
-you expect.
+If StrictJson is configured incorrectly, for example, by mapping to a class that doesn't have a constructor, it will
+throw `InvalidConfigurationException`. StrictJson does not validate adapters until it actually uses them for
+performance reasons, so InvalidConfigurationException may be thrown later than you expect.

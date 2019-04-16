@@ -1,4 +1,6 @@
-<?php namespace Burba\StrictJson;
+<?php declare(strict_types=1);
+
+namespace Burba\StrictJson;
 
 /**
  * Represents the current state of JSON decoding. Used to identify where in the JSON errors occurred
