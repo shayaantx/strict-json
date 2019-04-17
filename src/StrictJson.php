@@ -58,7 +58,7 @@ class StrictJson
     public function map(string $json, $type)
     {
         $type = $type instanceof Type ? $type : Type::ofClass($type);
-        return $this->mapDecoded($this->safeDecode($json), $type, JsonContext::root());
+        return $this->mapDecoded($this->safeDecode($json), $type, JsonPath::root());
     }
 
     /**
@@ -74,7 +74,7 @@ class StrictJson
     public function mapToArrayOf(string $json, $type)
     {
         $type = $type instanceof Type ? $type : Type::ofClass($type);
-        return $this->mapWithAdapter($this->safeDecode($json), new ArrayAdapter($type), JsonContext::root());
+        return $this->mapWithAdapter($this->safeDecode($json), new ArrayAdapter($type), JsonPath::root());
     }
 
     /**
@@ -82,33 +82,33 @@ class StrictJson
      *
      * @param mixed $decoded_json An associative array or other primitive
      * @param Type $target_type Either a class name or a scalar name (i.e. string, int, float, bool)
-     * @param JsonContext $context The current parsing context, or null if being called at the root of the decoded JSON
+     * @param JsonPath $path The current JSON parsing path, or null if being called at the root of the decoded JSON
      *
      * @return mixed
      * @throws JsonFormatException
      */
-    public function mapDecoded($decoded_json, Type $target_type, JsonContext $context)
+    public function mapDecoded($decoded_json, Type $target_type, JsonPath $path)
     {
         $adapter = $this->type_adapters[$target_type->getTypeName()] ?? null;
         if ($adapter !== null) {
-            return $this->mapWithAdapter($decoded_json, $adapter, $context);
+            return $this->mapWithAdapter($decoded_json, $adapter, $path);
         }
 
         if ($target_type->isScalar()) {
-            return $this->mapScalar($decoded_json, $target_type, $context);
+            return $this->mapScalar($decoded_json, $target_type, $path);
         }
 
         if ($target_type->isClass()) {
-            return $this->mapClass($decoded_json, $target_type, $context);
+            return $this->mapClass($decoded_json, $target_type, $path);
         }
 
         if ($target_type->isArray()) {
-            throw new InvalidConfigurationException("Cannot map to arrays directly, use StrictJson::mapToArrayOf()", $context);
+            throw new InvalidConfigurationException("Cannot map to arrays directly, use StrictJson::mapToArrayOf()", $path);
         }
 
         // It should be impossible to get here, Type should either be a scalar, a class, or an array
         //@codeCoverageIgnoreStart
-        throw new InvalidConfigurationException("Target type \"$target_type\" is not a scalar type or valid class and has no registered type adapter", $context);
+        throw new InvalidConfigurationException("Target type \"$target_type\" is not a scalar type or valid class and has no registered type adapter", $path);
         //@codeCoverageIgnoreEnd
     }
 
@@ -117,14 +117,14 @@ class StrictJson
      *
      * @param string|int|array|bool|float $value The decoded json value to adapt
      * @param Adapter $adapter Object with a fromJson method
-     * @param JsonContext $context The current decoding context
+     * @param JsonPath $path The current decoding path
      *
      * @return mixed Whatever the adapter returns
      * @throws JsonFormatException If the provided value doesn't match the value the adapter expects
      */
-    private function mapWithAdapter($value, Adapter $adapter, JsonContext $context)
+    private function mapWithAdapter($value, Adapter $adapter, JsonPath $path)
     {
-        $context = $context ?? JsonContext::root();
+        $path = $path ?? JsonPath::root();
 
         $supports_value = false;
         foreach ($adapter->fromTypes() as $supported_type) {
@@ -147,38 +147,38 @@ class StrictJson
             } else {
                 throw new InvalidConfigurationException(
                     "Adapter $adapter_class does not support any types! (fromTypes must return an non-empty array)",
-                    $context
+                    $path
                 );
             }
 
-            throw new JsonFormatException("Expected $expectation, found $json_type (using $adapter_class)", $context);
+            throw new JsonFormatException("Expected $expectation, found $json_type (using $adapter_class)", $path);
         }
 
         try {
-            return $adapter->fromJson($value, $this, $context);
+            return $adapter->fromJson($value, $this, $path);
         } /** @noinspection PhpRedundantCatchClauseInspection */ catch (JsonFormatException $e) {
             throw $e;
         } catch (Exception $e) {
             $adapter_class = get_class($adapter);
-            throw new InvalidConfigurationException("Adapter {$adapter_class} threw an exception", $context, $e);
+            throw new InvalidConfigurationException("Adapter {$adapter_class} threw an exception", $path, $e);
         }
     }
 
     /**
      * @param $decoded_json
      * @param Type $target_type
-     * @param JsonContext $context
+     * @param JsonPath $path
      *
      * @return mixed
      * @throws JsonFormatException
      */
-    private function mapScalar($decoded_json, Type $target_type, JsonContext $context)
+    private function mapScalar($decoded_json, Type $target_type, JsonPath $path)
     {
         if ($target_type->allowsValue($decoded_json)) {
             return $decoded_json;
         } else {
             $json_type = gettype($decoded_json);
-            throw new JsonFormatException("Value is of type $json_type, expected type $target_type", $context);
+            throw new JsonFormatException("Value is of type $json_type, expected type $target_type", $path);
         }
     }
 
@@ -186,12 +186,12 @@ class StrictJson
     /**
      * @param $parsed_json
      * @param Type $type
-     * @param JsonContext $context
+     * @param JsonPath $path
      *
      * @return object
      * @throws JsonFormatException
      */
-    private function mapClass($parsed_json, Type $type, JsonContext $context): object
+    private function mapClass($parsed_json, Type $type, JsonPath $path): object
     {
         try {
             $class = new ReflectionClass($type->getTypeName());
@@ -199,39 +199,39 @@ class StrictJson
         } catch (ReflectionException $e) {
             // Right now it's not possible to trigger this exception from the public API, because the only method that
             // calls this checks if $classname is a class first
-            throw new InvalidConfigurationException("Type $type is not a valid class", $context, $e);
+            throw new InvalidConfigurationException("Type $type is not a valid class", $path, $e);
             // @codeCoverageIgnoreEnd
         }
 
         $constructor = $class->getConstructor();
         if ($constructor === null) {
-            throw new InvalidConfigurationException("Type $type does not have a valid constructor", $context);
+            throw new InvalidConfigurationException("Type $type does not have a valid constructor", $path);
         }
         $parameters = $constructor->getParameters();
         $constructor_args = [];
         foreach ($parameters as $parameter) {
             $parameter_name = $parameter->getName();
             if ($parameter->getType() === null) {
-                throw new InvalidConfigurationException("$type::__construct has parameter named $parameter_name with no specified type", $context);
+                throw new InvalidConfigurationException("$type::__construct has parameter named $parameter_name with no specified type", $path);
             }
 
             if (array_key_exists($parameter_name, $parsed_json)) {
                 $value = $parsed_json[$parameter_name];
                 $adapter = $this->parameter_adapters[$type->getTypeName()][$parameter_name] ?? null;
-                $param_context = $context->withProperty($parameter_name);
-                $param_type = Type::from($parameter, $param_context);
+                $param_path = $path->withProperty($parameter_name);
+                $param_type = Type::from($parameter, $param_path);
                 if ($adapter !== null) {
-                    $value = $this->mapWithAdapter($value, $adapter, $param_context);
+                    $value = $this->mapWithAdapter($value, $adapter, $param_path);
                 } elseif ($param_type->isArray()) {
                     // Catch the array case here, even though it would be caught in mapDecoded, because we have more
                     // information for a more helpful error message
                     throw new InvalidConfigurationException(
                         "$type::__construct has parameter name $parameter_name of type array with no parameter adapter\n"
                         . "(Use StrictJson::builder()->addArrayParameterAdapter(...) to register an array adapter for this class)",
-                        $param_context
+                        $param_path
                     );
                 } else {
-                    $value = $this->mapDecoded($value, Type::from($parameter, $param_context), $param_context);
+                    $value = $this->mapDecoded($value, Type::from($parameter, $param_path), $param_path);
                 }
                 $constructor_args[] = $value;
             } elseif ($parameter->isDefaultValueAvailable()) {
@@ -239,19 +239,19 @@ class StrictJson
                 /** @noinspection PhpUnhandledExceptionInspection */
                 $constructor_args[] = $parameter->getDefaultValue();
             } else {
-                throw new JsonFormatException("$type::__construct has non-optional parameter named $parameter_name that does not exist in JSON", $context);
+                throw new JsonFormatException("$type::__construct has non-optional parameter named $parameter_name that does not exist in JSON", $path);
             }
         }
 
         try {
             return $class->newInstanceArgs($constructor_args);
         } catch (InvalidArgumentException $e) {
-            throw new JsonFormatException("{$type->getTypeName()} threw a validation exception in the constructor", $context, $e);
+            throw new JsonFormatException("{$type->getTypeName()} threw a validation exception in the constructor", $path, $e);
         } catch (Exception $e) {
             $encoded_args = json_encode($constructor_args);
             throw new InvalidConfigurationException(
                 "Unable to construct object of type {$type->getTypeName()} with args $encoded_args",
-                $context,
+                $path,
                 $e
             );
         }
@@ -272,7 +272,7 @@ class StrictJson
             $err = json_last_error_msg();
             throw new JsonFormatException(
                 "Unable to parse invalid JSON ($err): $json",
-                JsonContext::root()
+                JsonPath::root()
             );
         }
         return $decoded;

@@ -16,7 +16,7 @@ interface Adapter
      *
      * @param StrictJson $delegate You can use this instance of StrictJson to delegate mapping decoded json to
      * StrictJson.
-     * @param JsonContext $context This gives you the JSON path of the position of the decoded json passed to this
+     * @param JsonPath $path This gives you the JSON path of the position of the decoded json passed to this
      * method. It's meant to be used to provide more detailed error messages either by passing to JsonFormatException or
      * by passing it to StrictJson when delegating
      *
@@ -26,7 +26,7 @@ interface Adapter
      *
      * @see ArrayAdapter For an example implementation that uses all three parameters
      */
-    public function fromJson($decoded_json, StrictJson $delegate, JsonContext $context);
+    public function fromJson($decoded_json, StrictJson $delegate, JsonPath $path);
 
     /**
      * The list of types this adapter supports in the decoded_json parameter of the fromJson method. StrictJson will

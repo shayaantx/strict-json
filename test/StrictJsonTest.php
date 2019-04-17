@@ -78,7 +78,7 @@ class StrictJsonTest extends TestCase
         $mapper = new StrictJson();
         $this->expectException(InvalidConfigurationException::class);
         $this->expectExceptionMessage('Cannot map to arrays directly, use StrictJson::mapToArrayOf() at path <json_root>');
-        $mapper->mapDecoded($decoded_json, Type::array(), JsonContext::root());
+        $mapper->mapDecoded($decoded_json, Type::array(), JsonPath::root());
     }
 
     /**

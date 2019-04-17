@@ -54,11 +54,11 @@ class Type
 
     /**
      * @param ReflectionParameter $parameter
-     * @param JsonContext $context
+     * @param JsonPath $path
      * @return Type
      * @internal
      */
-    public static function from(ReflectionParameter $parameter, JsonContext $context): Type
+    public static function from(ReflectionParameter $parameter, JsonPath $path): Type
     {
         $parameter_type = $parameter->getType()->getName();
         if ($parameter->isArray()) {
@@ -68,7 +68,7 @@ class Type
         } elseif (class_exists($parameter_type)) {
             return new Type($parameter_type, $parameter->allowsNull());
         } else {
-            throw new InvalidConfigurationException("Unsupported type $parameter_type", $context);
+            throw new InvalidConfigurationException("Unsupported type $parameter_type", $path);
         }
     }
 
@@ -81,7 +81,7 @@ class Type
     public static function ofClass(string $class): Type
     {
         if (!class_exists($class)) {
-            throw new InvalidConfigurationException("Type \"$class\" is not a valid class", JsonContext::root());
+            throw new InvalidConfigurationException("Type \"$class\" is not a valid class", JsonPath::root());
         }
         return new Type($class, false);
     }
