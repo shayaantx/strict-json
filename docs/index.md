@@ -143,13 +143,13 @@ For example, you can create a custom class adapter like this:
 ```php
 <?php declare(strict_types=1);
 use Burba\StrictJson\Adapter;
-use Burba\StrictJson\JsonContext;
+use Burba\StrictJson\JsonPath;
 use Burba\StrictJson\StrictJson;
 use Burba\StrictJson\Type;
 
 class DateAdapter implements Adapter
 {
-    public function fromJson($decoded_json, StrictJson $delegate, JsonContext $context): DateTime
+    public function fromJson($decoded_json, StrictJson $delegate, JsonPath $context): DateTime
     {
         return DateTime::createFromFormat(DateTime::ISO8601, $decoded_json);
     }
@@ -209,7 +209,7 @@ If you only want to map a single parameter of a class, you can use a parameter a
 <?php declare(strict_types=1);
 use Burba\StrictJson\Adapter;
 use Burba\StrictJson\Fixtures\Docs\Event;
-use Burba\StrictJson\JsonContext;
+use Burba\StrictJson\JsonPath;
 use Burba\StrictJson\StrictJson;
 use Burba\StrictJson\Type;
 use Burba\StrictJson\Fixtures\Docs\DateAdapter;
@@ -217,7 +217,7 @@ use Burba\StrictJson\Fixtures\Docs\DateAdapter;
 // Create your adapter as normal
 class LenientBooleanAdapter implements Adapter
 {
-    public function fromJson($decoded_value, StrictJson $delegate, JsonContext $context): bool
+    public function fromJson($decoded_value, StrictJson $delegate, JsonPath $path): bool
     {
         return (bool)$decoded_value;
     }

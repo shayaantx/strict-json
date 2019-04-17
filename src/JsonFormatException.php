@@ -7,9 +7,9 @@ use Throwable;
 
 class JsonFormatException extends Exception
 {
-    public function __construct($message, JsonContext $context, Throwable $previous = null)
+    public function __construct($message, JsonPath $path, Throwable $previous = null)
     {
-        $message = $message . ' at path ' . $context->__toString();
+        $message = $message . ' at path ' . $path->__toString();
         parent::__construct($message, 0, $previous);
     }
 }

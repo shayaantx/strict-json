@@ -3,7 +3,7 @@
 namespace Burba\StrictJson\Fixtures\Adapters;
 
 use Burba\StrictJson\Adapter;
-use Burba\StrictJson\JsonContext;
+use Burba\StrictJson\JsonPath;
 use Burba\StrictJson\JsonFormatException;
 use Burba\StrictJson\StrictJson;
 use Burba\StrictJson\Type;
@@ -14,12 +14,12 @@ class AdapterThatThrowsJsonFormatException implements Adapter
     /**
      * @param $decoded_json
      * @param StrictJson $delegate
-     * @param JsonContext $context
+     * @param JsonPath $path
      * @throws JsonFormatException
      */
-    public function fromJson($decoded_json, StrictJson $delegate, JsonContext $context)
+    public function fromJson($decoded_json, StrictJson $delegate, JsonPath $path)
     {
-        throw new JsonFormatException("I'm a very bad adapter", $context);
+        throw new JsonFormatException("I'm a very bad adapter", $path);
     }
 
     /**

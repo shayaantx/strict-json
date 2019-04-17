@@ -3,13 +3,13 @@
 namespace Burba\StrictJson\Fixtures\Docs;
 
 use Burba\StrictJson\Adapter;
-use Burba\StrictJson\JsonContext;
+use Burba\StrictJson\JsonPath;
 use Burba\StrictJson\StrictJson;
 use Burba\StrictJson\Type;
 
 class LenientBooleanAdapter implements Adapter
 {
-    public function fromJson($decoded_json, StrictJson $delegate, JsonContext $context): bool
+    public function fromJson($decoded_json, StrictJson $delegate, JsonPath $path): bool
     {
         return (bool)$decoded_json;
     }

@@ -3,13 +3,13 @@
 namespace Burba\StrictJson\Fixtures\Adapters;
 
 use Burba\StrictJson\Adapter;
-use Burba\StrictJson\JsonContext;
+use Burba\StrictJson\JsonPath;
 use Burba\StrictJson\StrictJson;
 use Burba\StrictJson\Type;
 
 class AdapterThatSupportsNoTypes implements Adapter
 {
-    public function fromJson($decoded_json, StrictJson $delegate, JsonContext $context): ?string
+    public function fromJson($decoded_json, StrictJson $delegate, JsonPath $path): ?string
     {
         return null;
     }

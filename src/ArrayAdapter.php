@@ -19,16 +19,16 @@ class ArrayAdapter implements Adapter
     /**
      * @param array $items
      * @param StrictJson $delegate
-     * @param JsonContext $context
+     * @param JsonPath $path
      * @return array
      *
      * @throws JsonFormatException
      */
-    public function fromJson($items, StrictJson $delegate, JsonContext $context)
+    public function fromJson($items, StrictJson $delegate, JsonPath $path)
     {
         $mapped_items = [];
         foreach ($items as $idx => $item) {
-            $mapped_items[] = $delegate->mapDecoded($item, $this->type, $context->withArrayIndex($idx));
+            $mapped_items[] = $delegate->mapDecoded($item, $this->type, $path->withArrayIndex($idx));
         }
         return $mapped_items;
     }

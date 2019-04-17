@@ -3,7 +3,7 @@
 namespace Burba\StrictJson\Fixtures\Adapters;
 
 use Burba\StrictJson\Adapter;
-use Burba\StrictJson\JsonContext;
+use Burba\StrictJson\JsonPath;
 use Burba\StrictJson\StrictJson;
 use Burba\StrictJson\Type;
 
@@ -20,7 +20,7 @@ class DefaultIfNullAdapter implements Adapter
         $this->default_value = $default_value;
     }
 
-    public function fromJson($decoded_json, StrictJson $delegate, JsonContext $context): float
+    public function fromJson($decoded_json, StrictJson $delegate, JsonPath $path): float
     {
         return $decoded_json === null ? $this->default_value : $decoded_json;
     }
