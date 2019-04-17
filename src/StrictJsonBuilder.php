@@ -13,9 +13,16 @@ class StrictJsonBuilder
         return $this;
     }
 
-    public function addParameterArrayAdapter(string $class_name, string $parameter_name, Type $array_item_type): self
+    /**
+     * @param string $class_name
+     * @param string $parameter_name
+     * @param string|Type $array_item_type
+     * @return StrictJsonBuilder
+     */
+    public function addParameterArrayAdapter(string $class_name, string $parameter_name, $array_item_type): self
     {
-        return $this->addParameterAdapter($class_name, $parameter_name, new ArrayAdapter($array_item_type));
+        $type = $array_item_type instanceof Type ? $array_item_type : Type::ofClass($array_item_type);
+        return $this->addParameterAdapter($class_name, $parameter_name, new ArrayAdapter($type));
     }
 
     public function addClassAdapter(string $class_name, Adapter $adapter): self

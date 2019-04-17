@@ -6,6 +6,7 @@ use Burba\StrictJson\Fixtures\Adapters\AdapterThatSupportsNoTypes;
 use Burba\StrictJson\Fixtures\Adapters\AdapterThatThrowsJsonFormatException;
 use Burba\StrictJson\Fixtures\Adapters\AdapterThatThrowsRuntimeException;
 use Burba\StrictJson\Fixtures\Adapters\DefaultIfNullAdapter;
+use Burba\StrictJson\Fixtures\Adapters\IntPropClassAdapterThatAddsFour;
 use Burba\StrictJson\Fixtures\BasicClass;
 use Burba\StrictJson\Fixtures\Docs\LenientBooleanAdapter;
 use Burba\StrictJson\Fixtures\HasClassProp;
@@ -13,9 +14,10 @@ use Burba\StrictJson\Fixtures\HasIntArrayProp;
 use Burba\StrictJson\Fixtures\HasIntProp;
 use Burba\StrictJson\Fixtures\HasNullableProp;
 use Burba\StrictJson\Fixtures\HasObjectProp;
-use Burba\StrictJson\Fixtures\IntPropClassAdapterThatAddsFour;
 use Burba\StrictJson\Fixtures\MissingConstructor;
 use Burba\StrictJson\Fixtures\NoTypesInConstructor;
+use Burba\StrictJson\Fixtures\ThrowsInvalidArgumentException;
+use Burba\StrictJson\Fixtures\ThrowsUnexpectedException;
 use PHPUnit\Framework\TestCase;
 
 class StrictJsonTest extends TestCase
@@ -400,5 +402,29 @@ class StrictJsonTest extends TestCase
             new HasNullableProp(1.4),
             $mapper->map($json, HasNullableProp::class)
         );
+    }
+
+    /**
+     * Verify that we wrap InvalidArgumentExceptions in JsonFormatExceptions
+     *
+     * @throws JsonFormatException
+     */
+    public function testModelThatThrowsInvalidArgumentException()
+    {
+        $json = '{"value": "not good enough"}';
+        $mapper = new StrictJson();
+        $this->expectException(JsonFormatException::class);
+        $this->expectExceptionMessage('threw a validation exception in the constructor');
+        $mapper->map($json, ThrowsInvalidArgumentException::class);
+    }
+
+    /** @throws JsonFormatException */
+    public function testModelThatThrowsUnexpectedException()
+    {
+        $json = '{"value": "not good enough"}';
+        $mapper = new StrictJson();
+        $this->expectException(InvalidConfigurationException::class);
+        $this->expectExceptionMessage('Unable to construct object');
+        $mapper->map($json, ThrowsUnexpectedException::class);
     }
 }

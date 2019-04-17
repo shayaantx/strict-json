@@ -3,6 +3,7 @@
 namespace Burba\StrictJson;
 
 use Exception;
+use InvalidArgumentException;
 use ReflectionClass;
 use ReflectionException;
 
@@ -19,13 +20,13 @@ class StrictJson
      * If you're doing more than very simple configuration, you probably want to use the static build method, which
      * gives you a nicer fluent interface for configuration
      *
-     * @see StrictJson::builder()
-     *
      * @param array $type_adapters A mapping of string type names to adapter objects. The type names can be either full
      * class names (including the namespace) or names of primitives if you want to change the way all primitives are
      * mapped
      * @param array $parameter_adapters A mapping of string type names to associative arrays, which map parameter names
      * to adapters. If you're configuring these, you probably want to use the StrictJson::builder() method instead
+     *
+     * @see StrictJson::builder()
      */
     public function __construct(array $type_adapters = [], array $parameter_adapters = [])
     {
@@ -74,27 +75,6 @@ class StrictJson
     {
         $type = $type instanceof Type ? $type : Type::ofClass($type);
         return $this->mapWithAdapter($this->safeDecode($json), new ArrayAdapter($type), JsonContext::root());
-    }
-
-    /**
-     * Decode the specified JSON, throwing if it's invalid JSON
-     *
-     * @param string $json
-     * @return mixed
-     *
-     * @throws JsonFormatException
-     */
-    private function safeDecode(string $json)
-    {
-        $decoded = json_decode($json, true);
-        if (json_last_error()) {
-            $err = json_last_error_msg();
-            throw new JsonFormatException(
-                "Unable to parse invalid JSON ($err): $json",
-                JsonContext::root()
-            );
-        }
-        return $decoded;
     }
 
     /**
@@ -263,6 +243,38 @@ class StrictJson
             }
         }
 
-        return $class->newInstanceArgs($constructor_args);
+        try {
+            return $class->newInstanceArgs($constructor_args);
+        } catch (InvalidArgumentException $e) {
+            throw new JsonFormatException("{$type->getTypeName()} threw a validation exception in the constructor", $context, $e);
+        } catch (Exception $e) {
+            $encoded_args = json_encode($constructor_args);
+            throw new InvalidConfigurationException(
+                "Unable to construct object of type {$type->getTypeName()} with args $encoded_args",
+                $context,
+                $e
+            );
+        }
+    }
+
+    /**
+     * Decode the specified JSON, throwing if it's invalid JSON
+     *
+     * @param string $json
+     * @return mixed
+     *
+     * @throws JsonFormatException
+     */
+    private function safeDecode(string $json)
+    {
+        $decoded = json_decode($json, true);
+        if (json_last_error()) {
+            $err = json_last_error_msg();
+            throw new JsonFormatException(
+                "Unable to parse invalid JSON ($err): $json",
+                JsonContext::root()
+            );
+        }
+        return $decoded;
     }
 }

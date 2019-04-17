@@ -1,8 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace Burba\StrictJson\Fixtures;
+namespace Burba\StrictJson\Fixtures\Adapters;
 
 use Burba\StrictJson\Adapter;
+use Burba\StrictJson\Fixtures\HasIntProp;
 use Burba\StrictJson\JsonContext;
 use Burba\StrictJson\JsonFormatException;
 use Burba\StrictJson\StrictJson;
