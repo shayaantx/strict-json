@@ -321,9 +321,10 @@ echo $user->getEventsAttended()[0]->getName();
 # Custom Validation
 
 If you want to validate more than just the parameter name and type of fields in the JSON, you can add a custom Adapter
-that does the validation, or you can just validate in the constructor of your model class. Exceptions thrown in your
-model constructor will be re-thrown by StrictJson when it attempts to map. Validation in your constructor has the
-additional benefit of validating your models even when you're not using StrictJson.
+that does the validation, or you can just validate in the constructor of your model class. Exceptions of type
+`InvalidArgumentException` will be re-thrown wrapped in `JsonFormatException`, so that you just have one exception to
+catch for validation errors. Other exceptions will be re-thrown wrapped in InvalidConfigurationException, to give you
+the JSON parsing context.
 
 # Exceptions
 
@@ -351,3 +352,12 @@ Value is of type string, expected type int at path $.a.b[1]
 If StrictJson is configured incorrectly, for example, by mapping to a class that doesn't have a constructor, it will
 throw `InvalidConfigurationException`. StrictJson does not validate adapters until it actually uses them for
 performance reasons, so InvalidConfigurationException may be thrown later than you expect.
+
+# Migrating from V1
+
+* Your adapters now must implement `Burba\StrictJson\Adapter`.
+* The deprecated `StrictJson::mapParsed` has been removed. Use `StrictJson::mapDecoded` instead.
+* The `$target_type` argument in `StrictJson::mapDecoded` now must be of type `Burba\StrictJson\Type` instead of string
+* The `$context` argument in `StrictJson::mapDecoded` is now required
+* When specifying basic types using the array `$array_item_type` parameter in
+`StrictJsonBuilder::addParameterArrayAdapter`, you must use the new `Burba\StrictJson\Type` class
