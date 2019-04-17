@@ -1,4 +1,6 @@
-<?php namespace Burba\StrictJson;
+<?php declare(strict_types=1);
+
+namespace Burba\StrictJson;
 
 use Burba\StrictJson\Fixtures\Docs\Address;
 use Burba\StrictJson\Fixtures\Docs\DateAdapter;
@@ -37,6 +39,19 @@ class DocsTest extends TestCase
         $this->assertEquals(
             new User('Joe User', 4, new Address('1234 Fake St.', '12345')),
             $mapper->map($json, User::class)
+        );
+    }
+
+    /**
+     * @throws JsonFormatException
+     */
+    public function testOptionalParamExample()
+    {
+        $mapper = new StrictJson();
+        $model = $mapper->map('{}', ModelWithOptionalParam::class);
+        $this->assertEquals(
+            'default',
+            $model->getOptionalParam()
         );
     }
 
@@ -105,7 +120,7 @@ class DocsTest extends TestCase
 
         $mapper = StrictJson::builder()
             ->addClassAdapter(DateTime::class, new DateAdapter())
-            ->addParameterArrayAdapter(User::class, 'events_attended', Event::class)
+            ->addParameterArrayAdapter(User::class, 'events_attended', Type::ofClass(Event::class))
             ->build();
 
         /** @var User $user */
@@ -113,19 +128,6 @@ class DocsTest extends TestCase
         $this->assertEquals(
             'Dinner party for Bob',
             $user->getEventsAttended()[0]->getName()
-        );
-    }
-
-    /**
-     * @throws JsonFormatException
-     */
-    public function testOptionalParamExample()
-    {
-        $mapper = new StrictJson();
-        $model = $mapper->map('{}', ModelWithOptionalParam::class);
-        $this->assertEquals(
-            'default',
-            $model->getOptionalParam()
         );
     }
 
@@ -155,7 +157,7 @@ class DocsTest extends TestCase
         ';
 
         $mapper = StrictJson::builder()
-            ->addParameterArrayAdapter(ErrorPathExampleA::class, 'b', 'int')
+            ->addParameterArrayAdapter(ErrorPathExampleA::class, 'b', Type::int())
             ->build();
 
         $this->expectException(JsonFormatException::class);

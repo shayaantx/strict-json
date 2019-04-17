@@ -1,4 +1,6 @@
-<?php namespace Burba\StrictJson\Fixtures\Docs;
+<?php declare(strict_types=1);
+
+namespace Burba\StrictJson\Fixtures\Docs;
 
 use DateTime;
 

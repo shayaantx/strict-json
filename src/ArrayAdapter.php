@@ -1,39 +1,40 @@
-<?php namespace Burba\StrictJson;
+<?php declare(strict_types=1);
+
+namespace Burba\StrictJson;
 
 /**
- * Json Adapter that maps json arrays to items of the given type
+ * Adapter that converts a decoded JSON array to an array of items of the specified type
  * @internal
  */
-class ArrayAdapter
+class ArrayAdapter implements Adapter
 {
-    /** @var string */
-    private $item_type;
+    /** @var Type */
+    private $type;
 
-    /**
-     * @param string $item_type Either a class name or a scalar name (i.e. string, int, float, bool)
-     */
-    public function __construct(string $item_type)
+    public function __construct(Type $type)
     {
-        $this->item_type = $item_type;
+        $this->type = $type;
     }
 
     /**
-     * Turn given array of items into an array of items of the type provided in the constructor
-     *
-     * @param StrictJson $delegate
      * @param array $items
-     * @param JsonContext|null $context
-     *
+     * @param StrictJson $delegate
+     * @param JsonContext $context
      * @return array
-     * @throws JsonFormatException If the array of items cannot be transformed
+     *
+     * @throws JsonFormatException
      */
-    public function fromJson(StrictJson $delegate, array $items, ?JsonContext $context = null): array
+    public function fromJson($items, StrictJson $delegate, JsonContext $context)
     {
-        $context = $context ?? JsonContext::root();
         $mapped_items = [];
         foreach ($items as $idx => $item) {
-            $mapped_items[] = $delegate->mapDecoded($item, $this->item_type, $context->withArrayIndex($idx));
+            $mapped_items[] = $delegate->mapDecoded($item, $this->type, $context->withArrayIndex($idx));
         }
         return $mapped_items;
+    }
+
+    public function fromTypes(): array
+    {
+        return [Type::array()];
     }
 }
