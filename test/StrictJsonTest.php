@@ -414,7 +414,7 @@ class StrictJsonTest extends TestCase
         $json = '{"value": "not good enough"}';
         $mapper = new StrictJson();
         $this->expectException(JsonFormatException::class);
-        $this->expectExceptionMessage('threw a validation exception in the constructor');
+        $this->expectExceptionMessage('threw a validation exception for args ["not good enough"]');
         $mapper->map($json, ThrowsInvalidArgumentException::class);
     }
 

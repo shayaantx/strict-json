@@ -246,7 +246,8 @@ class StrictJson
         try {
             return $class->newInstanceArgs($constructor_args);
         } catch (InvalidArgumentException $e) {
-            throw new JsonFormatException("{$type->getTypeName()} threw a validation exception in the constructor", $path, $e);
+            $encoded_args = json_encode($constructor_args);
+            throw new JsonFormatException("{$type->getTypeName()}::_construct threw a validation exception for args $encoded_args", $path, $e);
         } catch (Exception $e) {
             $encoded_args = json_encode($constructor_args);
             throw new InvalidConfigurationException(
