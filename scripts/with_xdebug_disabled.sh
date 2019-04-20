@@ -11,6 +11,7 @@ fi
 mv "${xdebug_ini}" "${xdebug_ini}.disabled"
 set +e
 eval "$@"
+exit_code=$?
 set -e
 mv "${xdebug_ini}.disabled" "${xdebug_ini}"
-exit $?
+exit ${exit_code}
