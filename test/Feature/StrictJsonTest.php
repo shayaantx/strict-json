@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Burba\StrictJson;
+namespace Burba\StrictJson\Feature;
 
 use Burba\StrictJson\Fixtures\Adapters\AdapterThatSupportsNoTypes;
 use Burba\StrictJson\Fixtures\Adapters\AdapterThatThrowsJsonFormatException;
@@ -18,6 +18,11 @@ use Burba\StrictJson\Fixtures\MissingConstructor;
 use Burba\StrictJson\Fixtures\NoTypesInConstructor;
 use Burba\StrictJson\Fixtures\ThrowsInvalidArgumentException;
 use Burba\StrictJson\Fixtures\ThrowsUnexpectedException;
+use Burba\StrictJson\InvalidConfigurationException;
+use Burba\StrictJson\JsonFormatException;
+use Burba\StrictJson\JsonPath;
+use Burba\StrictJson\StrictJson;
+use Burba\StrictJson\Type;
 use PHPUnit\Framework\TestCase;
 
 class StrictJsonTest extends TestCase
