@@ -5,7 +5,6 @@ use Burba\StrictJson\Fixtures\Docs\User;
 use Burba\StrictJson\JsonFormatException;
 use Burba\StrictJson\StrictJson;
 
-
 /**
  * @BeforeMethods({"setup"})
  * @Iterations(100)
