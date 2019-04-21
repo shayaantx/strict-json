@@ -15,14 +15,11 @@ use ReflectionException;
 class ConstructorParameterFetcher
 {
     private $constructor_params_by_class = [];
-    /** @var Adapter[] */
-    private $type_adapters;
     /** @var Adapter[string] */
     private $parameter_adapters;
 
-    public function __construct(array $type_adapters = [], array $parameter_adapters = [])
+    public function __construct(array $parameter_adapters = [])
     {
-        $this->type_adapters = $type_adapters;
         $this->parameter_adapters = $parameter_adapters;
     }
 
@@ -76,14 +73,13 @@ class ConstructorParameterFetcher
                     $path
                 );
             }
-            $param_type_name = $refl_param->getType()->getName();
 
             $param_type = Type::from($refl_param, $path);
             /** @noinspection PhpUnhandledExceptionInspection */
             $default_value = $refl_param->isDefaultValueAvailable()
                 ? $refl_param->getDefaultValue()
                 : TypedParameter::noDefaultValue();
-            $adapter = $this->parameter_adapters[$classname][$param_name] ?? $this->type_adapters[$param_type_name] ?? null;
+            $adapter = $this->parameter_adapters[$classname][$param_name] ?? null;
             $parameters[$param_name] = new TypedParameter($param_type, $default_value, $adapter);
             if ($param_type->isArray() && $adapter === null) {
                 // Catch the array case here, even though it would be caught in mapDecoded, because we have more
