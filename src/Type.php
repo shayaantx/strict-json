@@ -17,14 +17,24 @@ class Type
     ];
 
     /** @var string */
-    private $typename;
+    public $typename;
     /** @var bool */
     private $nullable;
+    /** @var bool */
+    private $is_scalar;
+    /** @var bool */
+    private $is_array;
+    /** @var bool */
+    private $is_class;
 
     private function __construct(string $typename, bool $nullable = false)
     {
         $this->typename = $typename;
         $this->nullable = $nullable;
+
+        $this->is_scalar = in_array($this->typename, self::SCALAR_TYPES);
+        $this->is_array = $this->typename === 'array';
+        $this->is_class = class_exists($typename);
     }
 
     public static function int(): Type
@@ -110,7 +120,7 @@ class Type
      */
     public function isScalar()
     {
-        return in_array($this->typename, self::SCALAR_TYPES);
+        return $this->is_scalar;
     }
 
     /**
@@ -119,7 +129,7 @@ class Type
      */
     public function isClass()
     {
-        return class_exists($this->typename);
+        return $this->is_class;
     }
 
     /**
@@ -128,7 +138,7 @@ class Type
      */
     public function isArray()
     {
-        return $this->typename === 'array';
+        return $this->is_array;
     }
 
     /**
@@ -141,7 +151,7 @@ class Type
         $value_type = $this->normalize(gettype($value));
 
         return $this->nullable && $value === null
-            || $this->getTypeName() === $value_type
+            || $this->typename === $value_type
             || (is_object($value) && get_class($value) === $this->getTypeName());
     }
 

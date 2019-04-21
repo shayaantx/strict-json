@@ -47,8 +47,9 @@ class TypeTest extends TestCase
             'float with float' => [Type::float(), 1.0],
             'array with array' => [Type::array(), []],
             'bool with bool' => [Type::bool(), true],
-            'Class with matching Class' => [Type::ofClass(HasNullableProp::class), new HasNullableProp(null)],
-            'nullable scalar with null' => [Type::int()->asNullable(), null]
+            'Class with matching Class' => [Type::ofClass(HasIntProp::class), new HasIntProp(1)],
+            'nullable scalar with null' => [Type::int()->asNullable(), null],
+            'nullable class with null' => [Type::ofClass(HasIntProp::class)->asNullable(), null],
         ];
     }
 }

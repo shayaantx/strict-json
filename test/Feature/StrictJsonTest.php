@@ -318,7 +318,7 @@ class StrictJsonTest extends TestCase
         $json = '{"object": {"should not": "work"}}';
         $mapper = new StrictJson();
         $this->expectException(InvalidConfigurationException::class);
-        $this->expectExceptionMessage('Unsupported type object at path $.object');
+        $this->expectExceptionMessage('Unsupported type object');
         $mapper->map($json, HasObjectProp::class);
     }
 
@@ -381,6 +381,21 @@ class StrictJsonTest extends TestCase
     /**
      * @throws JsonFormatException
      */
+    public function testAdapterWithNotMatchingType()
+    {
+        $json = '{"nullable_prop": "invalid_type"}';
+        $mapper = StrictJson::builder()
+            ->addParameterAdapter(HasNullableProp::class, 'nullable_prop', new DefaultIfNullAdapter(1.4))
+            ->build();
+
+        $this->expectException(JsonFormatException::class);
+        $this->expectExceptionMessage('Expected ?float, found string');
+        $mapper->map($json, HasNullableProp::class);
+    }
+
+    /**
+     * @throws JsonFormatException
+     */
     public function testAdapterThatSupportsManyTypesNotMatching()
     {
         $json = '{"does not": "matter"}';
@@ -431,5 +446,32 @@ class StrictJsonTest extends TestCase
         $this->expectException(InvalidConfigurationException::class);
         $this->expectExceptionMessage('Unable to construct object');
         $mapper->map($json, ThrowsUnexpectedException::class);
+    }
+
+    /**
+     * @throws JsonFormatException
+     */
+    public function testMapScalarToClass()
+    {
+        $json = '4';
+        $mapper = new StrictJson();
+        $this->expectException(JsonFormatException::class);
+        $mapper->map($json, HasIntProp::class);
+    }
+
+    /**
+     * @throws JsonFormatException
+     */
+    public function testAdaptClassParam()
+    {
+        $json = '{"int_prop_class": {"int_prop": 1}}';
+        $mapper = StrictJson::builder()
+            ->addClassAdapter(HasIntProp::class, new IntPropClassAdapterThatAddsFour())
+            ->build();
+
+        $this->assertEquals(
+            new HasClassProp(new HasIntProp(5)),
+            $mapper->map($json, HasClassProp::class)
+        );
     }
 }

@@ -2,17 +2,18 @@
 
 namespace Burba\StrictJson;
 
+use Burba\StrictJson\Internal\ConstructorParameterFetcher;
+use Burba\StrictJson\Internal\TypedParameter;
 use Exception;
 use InvalidArgumentException;
-use ReflectionClass;
-use ReflectionException;
 
 class StrictJson
 {
-    /** @var string[string[object]] */
-    private $parameter_adapters;
     /** @var array */
     private $type_adapters;
+    /** @var ConstructorParameterFetcher|null */
+    private $parameter_finder;
+
 
     /**
      * Create an instance of StrictJson configured with type and parameter adapters.
@@ -25,13 +26,14 @@ class StrictJson
      * mapped
      * @param array $parameter_adapters A mapping of string type names to associative arrays, which map parameter names
      * to adapters. If you're configuring these, you probably want to use the StrictJson::builder() method instead
+     * @param ConstructorParameterFetcher|null $parameter_finder
      *
      * @see StrictJson::builder()
      */
-    public function __construct(array $type_adapters = [], array $parameter_adapters = [])
+    public function __construct(array $type_adapters = [], array $parameter_adapters = [], ?ConstructorParameterFetcher $parameter_finder = null)
     {
-        $this->parameter_adapters = $parameter_adapters;
         $this->type_adapters = $type_adapters;
+        $this->parameter_finder = $parameter_finder ?? new ConstructorParameterFetcher($parameter_adapters);
     }
 
     /**
@@ -184,74 +186,54 @@ class StrictJson
 
     /** @noinspection PhpDocMissingThrowsInspection */
     /**
-     * @param $parsed_json
-     * @param Type $type
+     * @param $decoded_json
+     * @param Type $target_type
      * @param JsonPath $path
      *
      * @return object
      * @throws JsonFormatException
      */
-    private function mapClass($parsed_json, Type $type, JsonPath $path): object
+    private function mapClass($decoded_json, Type $target_type, JsonPath $path): object
     {
-        try {
-            $class = new ReflectionClass($type->getTypeName());
-            // @codeCoverageIgnoreStart
-        } catch (ReflectionException $e) {
-            // Right now it's not possible to trigger this exception from the public API, because the only method that
-            // calls this checks if $classname is a class first
-            throw new InvalidConfigurationException("Type $type is not a valid class", $path, $e);
-            // @codeCoverageIgnoreEnd
+        $type_name = $target_type->getTypeName();
+        $parameters = $this->parameter_finder->getParameters($type_name, $path);
+
+        if (!is_array($decoded_json)) {
+            $json_type = gettype($decoded_json);
+            throw new JsonFormatException("Expected object, found $json_type", $path);
         }
 
-        $constructor = $class->getConstructor();
-        if ($constructor === null) {
-            throw new InvalidConfigurationException("Type $type does not have a valid constructor", $path);
-        }
-        $parameters = $constructor->getParameters();
         $constructor_args = [];
-        foreach ($parameters as $parameter) {
-            $parameter_name = $parameter->getName();
-            if ($parameter->getType() === null) {
-                throw new InvalidConfigurationException("$type::__construct has parameter named $parameter_name with no specified type", $path);
-            }
-
-            if (array_key_exists($parameter_name, $parsed_json)) {
-                $value = $parsed_json[$parameter_name];
-                $adapter = $this->parameter_adapters[$type->getTypeName()][$parameter_name] ?? null;
-                $param_path = $path->withProperty($parameter_name);
-                $param_type = Type::from($parameter, $param_path);
-                if ($adapter !== null) {
-                    $value = $this->mapWithAdapter($value, $adapter, $param_path);
-                } elseif ($param_type->isArray()) {
-                    // Catch the array case here, even though it would be caught in mapDecoded, because we have more
-                    // information for a more helpful error message
-                    throw new InvalidConfigurationException(
-                        "$type::__construct has parameter name $parameter_name of type array with no parameter adapter\n"
-                        . "(Use StrictJson::builder()->addArrayParameterAdapter(...) to register an array adapter for this class)",
-                        $param_path
-                    );
+        /**
+         * @var string $param_name
+         * @var TypedParameter $param
+         */
+        foreach ($parameters as $param_name => $param) {
+            if (array_key_exists($param_name, $decoded_json)) {
+                $value = $decoded_json[$param_name];
+                $param_path = $path->withProperty($param_name);
+                if ($param->getAdapter() !== null) {
+                    $value = $this->mapWithAdapter($value, $param->getAdapter(), $param_path);
                 } else {
-                    $value = $this->mapDecoded($value, Type::from($parameter, $param_path), $param_path);
+                    $value = $this->mapDecoded($value, $param->getType(), $param_path);
                 }
                 $constructor_args[] = $value;
-            } elseif ($parameter->isDefaultValueAvailable()) {
-                // Guaranteed not to throw because we checked in the if condition
-                /** @noinspection PhpUnhandledExceptionInspection */
-                $constructor_args[] = $parameter->getDefaultValue();
+            } elseif ($param->hasDefaultValue()) {
+                $constructor_args[] = $param->getDefaultValue();
             } else {
-                throw new JsonFormatException("$type::__construct has non-optional parameter named $parameter_name that does not exist in JSON", $path);
+                throw new JsonFormatException("$target_type::__construct has non-optional parameter named $param_name that does not exist in JSON", $path);
             }
         }
 
         try {
-            return $class->newInstanceArgs($constructor_args);
+            return new $type_name(...$constructor_args);
         } catch (InvalidArgumentException $e) {
             $encoded_args = json_encode($constructor_args);
-            throw new JsonFormatException("{$type->getTypeName()}::_construct threw a validation exception for args $encoded_args", $path, $e);
+            throw new JsonFormatException("{$type_name}::_construct threw a validation exception for args $encoded_args", $path, $e);
         } catch (Exception $e) {
             $encoded_args = json_encode($constructor_args);
             throw new InvalidConfigurationException(
-                "Unable to construct object of type {$type->getTypeName()} with args $encoded_args",
+                "Unable to construct object of type {$type_name} with args $encoded_args",
                 $path,
                 $e
             );

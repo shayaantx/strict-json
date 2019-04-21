@@ -2,6 +2,8 @@
 
 namespace Burba\StrictJson;
 
+use Burba\StrictJson\Internal\ConstructorParameterFetcher;
+
 class StrictJsonBuilder
 {
     private $parameter_adapters = [];
@@ -33,6 +35,10 @@ class StrictJsonBuilder
 
     public function build(): StrictJson
     {
-        return new StrictJson($this->class_adapters, $this->parameter_adapters);
+        return new StrictJson(
+            $this->class_adapters,
+            $this->parameter_adapters,
+            new ConstructorParameterFetcher($this->class_adapters, $this->parameter_adapters)
+        );
     }
 }
