@@ -8,7 +8,7 @@ use RuntimeException;
 use stdClass;
 
 /**
- * @internal
+ * This class is not subject to semantic versioning compatibility guarantees
  */
 class TypedParameter
 {

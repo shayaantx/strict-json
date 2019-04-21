@@ -1,10 +1,15 @@
 <?php declare(strict_types=1);
 
-namespace Burba\StrictJson;
+namespace Burba\StrictJson\Internal;
+
+use Burba\StrictJson\Adapter;
+use Burba\StrictJson\JsonFormatException;
+use Burba\StrictJson\JsonPath;
+use Burba\StrictJson\StrictJson;
+use Burba\StrictJson\Type;
 
 /**
- * Adapter that converts a decoded JSON array to an array of items of the specified type
- * @internal
+ * This class is not subject to semantic versioning compatibility guarantees
  */
 class ArrayAdapter implements Adapter
 {

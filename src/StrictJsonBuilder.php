@@ -2,6 +2,7 @@
 
 namespace Burba\StrictJson;
 
+use Burba\StrictJson\Internal\ArrayAdapter;
 use Burba\StrictJson\Internal\ConstructorParameterFetcher;
 
 class StrictJsonBuilder

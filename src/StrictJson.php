@@ -2,6 +2,7 @@
 
 namespace Burba\StrictJson;
 
+use Burba\StrictJson\Internal\ArrayAdapter;
 use Burba\StrictJson\Internal\ConstructorParameterFetcher;
 use Burba\StrictJson\Internal\TypedParameter;
 use Exception;
@@ -24,7 +25,8 @@ class StrictJson
      * @param array $type_adapters A mapping of string type names to adapter objects. The type names can be either full
      * class names (including the namespace) or names of primitives if you want to change the way all primitives are
      * mapped
-     * @param ConstructorParameterFetcher|null $parameter_finder
+     * @param ConstructorParameterFetcher|null $parameter_finder Don't use this, use StrictJson::builder. This parameter
+     * is not subject to semantic versioning compatibility guarantees
      *
      * @see StrictJson::builder()
      */

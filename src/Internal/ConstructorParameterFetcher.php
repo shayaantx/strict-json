@@ -10,7 +10,7 @@ use ReflectionClass;
 use ReflectionException;
 
 /**
- * @internal
+ * This class is not subject to semantic versioning compatibility guarantees
  */
 class ConstructorParameterFetcher
 {
