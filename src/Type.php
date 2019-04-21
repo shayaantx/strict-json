@@ -94,8 +94,6 @@ class Type
             throw new InvalidConfigurationException("Type \"$class\" is not a valid class", JsonPath::root());
         }
 
-        //TODO: infection claims that swapping false for true here doesn't fail the tests, but manually doing it does
-        // fail the tests, so I don't know what's going on here
         return new Type($class, false);
     }
 
