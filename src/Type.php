@@ -152,7 +152,7 @@ class Type
         $value_type = $this->normalize(gettype($value));
 
         return $this->nullable && $value === null
-            || $this->typename === $value_type
+            || $this->getTypeName() === $value_type
             || (is_object($value) && get_class($value) === $this->getTypeName());
     }
 
