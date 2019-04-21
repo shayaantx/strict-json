@@ -2,4 +2,4 @@
 
 set -euo pipefail
 
-scripts/with_xdebug_disabled.sh vendor/bin/phpbench run
+scripts/with_xdebug_disabled.sh vendor/bin/phpbench run --report=aggregate --progress=none
