@@ -28,6 +28,9 @@ jobs:
       - run:
           name: Run Mutation Tests
           command: "./scripts/run_mutation_tests.sh"
+      - run:
+          name: Run Benchmarks
+          command: "./scripts/run_benchmarks.sh"
       - store_test_results:
           path: test-results/
       - store_artifacts:
