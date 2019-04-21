@@ -24,16 +24,14 @@ class StrictJson
      * @param array $type_adapters A mapping of string type names to adapter objects. The type names can be either full
      * class names (including the namespace) or names of primitives if you want to change the way all primitives are
      * mapped
-     * @param array $parameter_adapters A mapping of string type names to associative arrays, which map parameter names
-     * to adapters. If you're configuring these, you probably want to use the StrictJson::builder() method instead
      * @param ConstructorParameterFetcher|null $parameter_finder
      *
      * @see StrictJson::builder()
      */
-    public function __construct(array $type_adapters = [], array $parameter_adapters = [], ?ConstructorParameterFetcher $parameter_finder = null)
+    public function __construct(array $type_adapters = [], ?ConstructorParameterFetcher $parameter_finder = null)
     {
         $this->type_adapters = $type_adapters;
-        $this->parameter_finder = $parameter_finder ?? new ConstructorParameterFetcher($parameter_adapters);
+        $this->parameter_finder = $parameter_finder ?? new ConstructorParameterFetcher();
     }
 
     /**

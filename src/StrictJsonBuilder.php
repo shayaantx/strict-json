@@ -37,8 +37,7 @@ class StrictJsonBuilder
     {
         return new StrictJson(
             $this->class_adapters,
-            $this->parameter_adapters,
-            new ConstructorParameterFetcher($this->class_adapters, $this->parameter_adapters)
+            new ConstructorParameterFetcher($this->parameter_adapters)
         );
     }
 }
