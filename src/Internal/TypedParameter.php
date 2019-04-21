@@ -42,7 +42,7 @@ class TypedParameter
 
     public function hasDefaultValue()
     {
-        return $this->default_value !== self::$no_default_value;
+        return $this->default_value !== self::noDefaultValue();
     }
 
     public function getDefaultValue()
