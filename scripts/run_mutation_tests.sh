@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-vendor/bin/infection \
+scripts/with_xdebug_disabled.sh vendor/bin/infection \
     --threads=$(nproc) \
     --coverage=test-results/phpunit/ \
     --min-msi=96 \

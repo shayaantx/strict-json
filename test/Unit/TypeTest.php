@@ -1,10 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace Burba\StrictJson;
+namespace Burba\StrictJson\Unit;
 
 use Burba\StrictJson\Fixtures\HasIntProp;
 use Burba\StrictJson\Fixtures\HasNullableProp;
+use Burba\StrictJson\Type;
 use PHPUnit\Framework\TestCase;
 
 class TypeTest extends TestCase
