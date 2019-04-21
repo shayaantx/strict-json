@@ -5,4 +5,4 @@ scripts/with_xdebug_disabled.sh vendor/bin/infection \
     --threads=$(nproc) \
     --coverage=test-results/phpunit/ \
     --min-msi=96 \
-    --min-covered-msi=100
+    --min-covered-msi=98
