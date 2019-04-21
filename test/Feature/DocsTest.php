@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Burba\StrictJson;
+namespace Burba\StrictJson\Feature;
 
 use Burba\StrictJson\Fixtures\Docs\Address;
 use Burba\StrictJson\Fixtures\Docs\DateAdapter;
@@ -11,6 +11,9 @@ use Burba\StrictJson\Fixtures\Docs\LenientBooleanAdapter;
 use Burba\StrictJson\Fixtures\Docs\ModelWithNullableParam;
 use Burba\StrictJson\Fixtures\Docs\ModelWithOptionalParam;
 use Burba\StrictJson\Fixtures\Docs\User;
+use Burba\StrictJson\JsonFormatException;
+use Burba\StrictJson\StrictJson;
+use Burba\StrictJson\Type;
 use DateTime;
 use PHPUnit\Framework\TestCase;
 
