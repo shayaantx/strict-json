@@ -361,3 +361,9 @@ performance reasons, so InvalidConfigurationException may be thrown later than y
 * The `$context` argument in `StrictJson::mapDecoded` is now required
 * When specifying basic types using the array `$array_item_type` parameter in
 `StrictJsonBuilder::addParameterArrayAdapter`, you must use the new `Burba\StrictJson\Type` class
+
+# Migrating from V2
+
+* If you were using the parameter_adapters parameter in the StrictJson constructor, you'll have to migrate to using
+`StrictJson::builder()`
+* JsonContext has been renamed to JsonPath

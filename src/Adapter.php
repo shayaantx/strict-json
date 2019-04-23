@@ -2,6 +2,8 @@
 
 namespace Burba\StrictJson;
 
+use Burba\StrictJson\Internal\ArrayAdapter;
+
 /**
  * Adapter that converts decoded portion of the mapped json to the type it is registered for
  */

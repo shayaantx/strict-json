@@ -37,7 +37,10 @@ class DocsTest extends TestCase
           }
         }
         ';
-        $mapper = new StrictJson();
+
+        $mapper = StrictJson::builder()
+            ->addParameterArrayAdapter(User::class, 'events_attended', Event::class)
+            ->build();
 
         $this->assertEquals(
             new User('Joe User', 4, new Address('1234 Fake St.', '12345')),
