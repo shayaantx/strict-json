@@ -139,19 +139,41 @@ adapters.
 Sometimes your model classes have a parameter that does not have the same basic type as its JSON representation. In that
 case, you can write a custom adapter to tell StrictJson how to parse that parameter.
 
-For example, you can create a custom class adapter like this:
+For example, if you want to create DateTime objects from ISO8601 formatted strings, you can create a custom class
+adapter like this:
+
 ```php
 <?php declare(strict_types=1);
 use Burba\StrictJson\Adapter;
+use Burba\StrictJson\Internal\ArrayAdapter;
+use Burba\StrictJson\JsonFormatException;
 use Burba\StrictJson\JsonPath;
 use Burba\StrictJson\StrictJson;
 use Burba\StrictJson\Type;
 
 class DateAdapter implements Adapter
 {
-    public function fromJson($decoded_json, StrictJson $delegate, JsonPath $context): DateTime
+    /**
+     * Convert decoded json into the specified type
+     *
+     * @param string $decoded_json This is guaranteed to be one of the types returned from fromTypes
+     * @param StrictJson $delegate Use this if you want to delegate a portion of the decoding process to StrictJson
+     * @param JsonPath $path Include it when you throw JsonFormatException or delegate to StrictJson for better error
+     * messages
+     *
+     * @return DateTime
+     * @throws JsonFormatException If the JSON is not in the format you expect
+     *
+     * @see ArrayAdapter For a more advanced example that uses delegation and paths
+     */
+    public function fromJson($decoded_json, StrictJson $delegate, JsonPath $path): DateTime
     {
-        return DateTime::createFromFormat(DateTime::ISO8601, $decoded_json);
+        $date = DateTime::createFromFormat(DATE_ISO8601, $decoded_json);
+        if ($date === false) {
+            throw new JsonFormatException("Expected ISO8601 date, found $decoded_json", $path);
+        }
+
+        return $date;
     }
 
     /**
@@ -194,7 +216,7 @@ $json = '
 ';
 
 // Register your adapter
-$mapper = new StrictJson([DateTime::class => new DateAdapter()]);
+$mapper = StrictJson::builder()->addClassAdapter(DateTime::class, new DateAdapter())->build();
 $event = $mapper->map($json, DateTime::class);
 
 echo $event->getDate()->format("y");
