@@ -16,6 +16,7 @@ use Burba\StrictJson\StrictJson;
 use Burba\StrictJson\Type;
 use DateTime;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 
 /**
  * Suite of tests that verify that the Readme examples work
@@ -45,6 +46,42 @@ class DocsTest extends TestCase
         $this->assertEquals(
             new User('Joe User', 4, new Address('1234 Fake St.', '12345')),
             $mapper->map($json, User::class)
+        );
+    }
+
+    public function testBasicExampleHandwritten()
+    {
+        $json = '
+        {
+          "name": "Joe User",
+          "age": 4,
+          "address": {
+            "street": "1234 Fake St.",
+            "zip_code": "12345"
+          }
+        }
+        ';
+
+        $decoded_json = json_decode($json, true);
+        if (!is_array($decoded_json)) {
+            throw new RuntimeException('Invalid JSON');
+        }
+
+        $name = $decoded_json['name'] ?? null;
+        $age = $decoded_json['age'] ?? null;
+        $street = $decoded_json['address']['street'] ?? null;
+        $zip_code = $decoded_json['address']['zip_code'] ?? null;
+
+        if (!is_string($name) || !is_int($age) || !is_string($street) || !is_string($zip_code)) {
+            throw new RuntimeException('Invalid JSON');
+        }
+
+        $address = new Address($street, $zip_code);
+        $user = new User($name, $age, $address);
+
+        $this->assertEquals(
+            new User('Joe User', 4, new Address('1234 Fake St.', '12345')),
+            $user
         );
     }
 
