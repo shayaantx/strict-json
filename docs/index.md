@@ -1,12 +1,8 @@
-# What is StrictJson?
+StrictJson turns JSON into your plain old PHP classes
 
-StrictJson turns JSON into instances of your plain old PHP classes
+# Why use StrictJson?
 
-StrictJson examines the constructor of your model class and collects parameter names and types.
-Then it validates the JSON to ensure that it has a property with a matching type for each required constructor
-parameter. Finally, it instantiates your model classes (with their own constructor) and returns them to you.
-
-For example, given the the JSON
+Given this JSON
 ```json
 {
   "name": "Joe User",
@@ -17,61 +13,65 @@ For example, given the the JSON
   }
 }
 ```
-And these classes:
+
+StrictJson turns this code:
 ```php
 <?php declare(strict_types=1);
-class Address {
-    private $street;
-    private $zip_code;
+use Burba\StrictJson\Fixtures\Docs\Address;
+use Burba\StrictJson\Fixtures\Docs\User;
 
-    public function __construct(string $street, string $zip_code) {
-        $this->street = $street;
-        $this->zip_code = $zip_code;
-    }
-    
-    /** Getters omitted for brevity */
+$decoded_json = json_decode($json, true);
+if (!is_array($decoded_json)) {
+    throw new RuntimeException('Invalid JSON');
 }
 
-class User {
-    private $name;
-    private $age;
-    private $address;
+$name = $decoded_json['name'] ?? null;
+$age = $decoded_json['age'] ?? null;
+$street = $decoded_json['address']['street'] ?? null;
+$zip_code = $decoded_json['address']['zip_code'] ?? null;
 
-    public function __construct(string $name, int $age, Address $address) {
+if (!is_string($name) || !is_int($age) || !is_string($street) || !is_string($zip_code)) {
+    throw new RuntimeException('Invalid JSON');
+}
+
+$address = new Address($street, $zip_code);
+$user = new User($name, $age, $address);
+```
+
+Into this:
+```php
+<?php declare(strict_types=1);
+use Burba\StrictJson\StrictJson;
+use Burba\StrictJson\Fixtures\Docs\User;
+
+$mapper = new StrictJson();
+$mapper->map($json, User::class);
+```
+
+# How does it work?
+
+StrictJson works with plain old php classes, they need to have a constructor with parameter names and types that match
+your expected JSON, like this:
+
+```php
+<?php declare(strict_types=1);
+use Burba\StrictJson\Fixtures\Docs\Address;
+
+class User
+{
+    public function __construct(string $name, int $age, Address $address)
+    {
         $this->name = $name;
         $this->age = $age;
         $this->address = $address;
     }
-
-    /** Getters omitted for brevity */
+    /** Properties and getters omitted for brevity */
 }
 ```
 
-This code:
-```php
-<?php declare(strict_types=1);
-$mapper = new StrictJson();
-$user = $mapper->map($json, User::class);
-var_dump($user);
-```
-
-
-Results in the following output
-```
-class \User#1 (3) {
-  private $name =>
-  string(8) "Joe User"
-  private $age =>
-  int(4)
-  private $address =>
-  class \Address#1 (2) {
-    private $street =>
-    string(13) "1234 Fake St."
-    private $zip_code =>
-    string(5) "12345"
-  }
-}
-```
+StrictJson then examines the constructor of your model class and collects parameter names and types.
+Then it validates the JSON to ensure that it has a property with a matching name and type for each required constructor
+parameter. Finally, it instantiates your model classes (with their own constructor) and returns them to you.
 
 # Optional Fields
 If your constructor parameter has a default value, StrictJson will use that value if the field does not exist in the
