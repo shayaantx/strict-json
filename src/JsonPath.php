@@ -7,6 +7,7 @@ namespace Burba\StrictJson;
  */
 class JsonPath
 {
+    /** @var string */
     private $path;
 
     private function __construct(string $path = '$')

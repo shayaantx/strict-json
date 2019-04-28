@@ -26,7 +26,7 @@ class DocsTest extends TestCase
     /**
      * @throws JsonFormatException
      */
-    public function testBasicExample()
+    public function testBasicExample(): void
     {
         $json = '
         {
@@ -49,7 +49,7 @@ class DocsTest extends TestCase
         );
     }
 
-    public function testBasicExampleHandwritten()
+    public function testBasicExampleHandwritten(): void
     {
         $json = '
         {
@@ -88,9 +88,10 @@ class DocsTest extends TestCase
     /**
      * @throws JsonFormatException
      */
-    public function testOptionalParamExample()
+    public function testOptionalParamExample(): void
     {
         $mapper = new StrictJson();
+        /** @var ModelWithOptionalParam $model */
         $model = $mapper->map('{}', ModelWithOptionalParam::class);
         $this->assertEquals(
             'default',
@@ -101,7 +102,7 @@ class DocsTest extends TestCase
     /**
      * @throws JsonFormatException
      */
-    public function testClassAdapterExample()
+    public function testClassAdapterExample(): void
     {
         $json = '
         {
@@ -119,7 +120,7 @@ class DocsTest extends TestCase
     /**
      * @throws JsonFormatException
      */
-    public function testParameterAdapterExample()
+    public function testParameterAdapterExample(): void
     {
         $json = '
         {
@@ -142,7 +143,7 @@ class DocsTest extends TestCase
     /**
      * @throws JsonFormatException
      */
-    public function testArrayAdapterExample()
+    public function testArrayAdapterExample(): void
     {
         $json = '
         {
@@ -177,10 +178,11 @@ class DocsTest extends TestCase
     /**
      * @throws JsonFormatException
      */
-    public function testNullableParamExample()
+    public function testNullableParamExample(): void
     {
         $json = '{"nullable_param": null}';
         $mapper = new StrictJson();
+        /** @var ModelWithNullableParam $model */
         $model = $mapper->map($json, ModelWithNullableParam::class);
         $message = is_null($model->getNullableParam()) ? 'Param is null' : 'Param is not null';
         $this->assertEquals('Param is null', $message);
@@ -189,7 +191,7 @@ class DocsTest extends TestCase
     /**
      * @throws JsonFormatException
      */
-    public function testErrorPathExample()
+    public function testErrorPathExample(): void
     {
         $json = '
         {

@@ -30,7 +30,7 @@ class StrictJsonTest extends TestCase
     /**
      * @throws JsonFormatException
      */
-    public function testBasicCase()
+    public function testBasicCase(): void
     {
         $json = '
         {
@@ -64,7 +64,7 @@ class StrictJsonTest extends TestCase
     /**
      * @throws JsonFormatException
      */
-    public function testMapToArrayOf()
+    public function testMapToArrayOf(): void
     {
         $json = '[{"int_prop": 1}, {"int_prop": 2}]';
         $mapper = new StrictJson();
@@ -77,7 +77,7 @@ class StrictJsonTest extends TestCase
     /**
      * @throws JsonFormatException
      */
-    public function testMapDecodedWithArray()
+    public function testMapDecodedWithArray(): void
     {
         $decoded_json = ['does not' => 'matter'];
         $mapper = new StrictJson();
@@ -89,7 +89,7 @@ class StrictJsonTest extends TestCase
     /**
      * @throws JsonFormatException
      */
-    public function testArrayParameterWithoutAdapter()
+    public function testArrayParameterWithoutAdapter(): void
     {
         $json = '{"int_array_prop": [1, 2, 3]}';
         $mapper = new StrictJson();
@@ -101,7 +101,7 @@ class StrictJsonTest extends TestCase
     /**
      * @throws JsonFormatException
      */
-    public function testIntArrayProperty()
+    public function testIntArrayProperty(): void
     {
         $json = '{ "int_array_prop": [1, 2, 3] }';
         $mapper = StrictJson::builder()
@@ -117,7 +117,7 @@ class StrictJsonTest extends TestCase
     /**
      * @throws JsonFormatException
      */
-    public function testClassAdapterForRootObject()
+    public function testClassAdapterForRootObject(): void
     {
         $mapper = StrictJson::builder()
             ->addClassAdapter(HasIntProp::class, new IntPropClassAdapterThatAddsFour())
@@ -133,7 +133,7 @@ class StrictJsonTest extends TestCase
     /**
      * @throws JsonFormatException
      */
-    public function testClassAdapterForProperty()
+    public function testClassAdapterForProperty(): void
     {
         $mapper = StrictJson::builder()
             ->addClassAdapter(HasIntProp::class, new IntPropClassAdapterThatAddsFour())
@@ -149,7 +149,7 @@ class StrictJsonTest extends TestCase
     /**
      * @throws JsonFormatException
      */
-    public function testInvalidJson()
+    public function testInvalidJson(): void
     {
         $mapper = new StrictJson();
         $json = '{ invalid';
@@ -161,7 +161,7 @@ class StrictJsonTest extends TestCase
     /**
      * @throws JsonFormatException
      */
-    public function testInvalidTargetType()
+    public function testInvalidTargetType(): void
     {
         $mapper = new StrictJson();
         $json = '{"does_not": "matter"}';
@@ -173,7 +173,7 @@ class StrictJsonTest extends TestCase
     /**
      * @throws JsonFormatException
      */
-    public function testClassAdapterThatThrowsJsonFormatException()
+    public function testClassAdapterThatThrowsJsonFormatException(): void
     {
         $mapper = new StrictJson([HasIntProp::class => new AdapterThatThrowsJsonFormatException()]);
         $json = '{"does_not": "matter"}';
@@ -186,7 +186,7 @@ class StrictJsonTest extends TestCase
      * JsonFormatException
      * @throws JsonFormatException
      */
-    public function testMismatchedTypes()
+    public function testMismatchedTypes(): void
     {
         $mapper = new StrictJson();
         $json = '{"int_prop": "1"}';
@@ -200,7 +200,7 @@ class StrictJsonTest extends TestCase
      *
      * @throws JsonFormatException
      */
-    public function testClassWithNonTypedConstructorArgs()
+    public function testClassWithNonTypedConstructorArgs(): void
     {
         $mapper = new StrictJson();
         $json = '{"unknown_property": "value"}';
@@ -211,7 +211,7 @@ class StrictJsonTest extends TestCase
     /**
      * @throws JsonFormatException
      */
-    public function testMissingProperty()
+    public function testMissingProperty(): void
     {
         $mapper = new StrictJson();
         $json = '{"unknown_property": "value"}';
@@ -224,7 +224,7 @@ class StrictJsonTest extends TestCase
     /**
      * @throws JsonFormatException
      */
-    public function testJsonHasWrongItemType()
+    public function testJsonHasWrongItemType(): void
     {
         $mapper = StrictJson::builder()
             ->addParameterArrayAdapter(HasIntArrayProp::class, 'int_array_prop', Type::int())
@@ -237,7 +237,7 @@ class StrictJsonTest extends TestCase
     /**
      * @throws JsonFormatException
      */
-    public function testMissingConstructor()
+    public function testMissingConstructor(): void
     {
         $mapper = new StrictJson();
         $json = '{"does not": "matter"}';
@@ -252,7 +252,7 @@ class StrictJsonTest extends TestCase
      *
      * @throws JsonFormatException
      */
-    public function testMismatchedAdapterParameterJsonField()
+    public function testMismatchedAdapterParameterJsonField(): void
     {
         $mapper = new StrictJson([HasIntProp::class => new IntPropClassAdapterThatAddsFour()]);
         $json = '{"int_prop_class": 4}';
@@ -264,7 +264,7 @@ class StrictJsonTest extends TestCase
     /**
      * @throws JsonFormatException
      */
-    public function testNullableParameterWithNullValue()
+    public function testNullableParameterWithNullValue(): void
     {
         $mapper = new StrictJson();
         $json = '{"nullable_prop": null}';
@@ -277,7 +277,7 @@ class StrictJsonTest extends TestCase
     /**
      * @throws JsonFormatException
      */
-    public function testNullValueForNonNullableParameter()
+    public function testNullValueForNonNullableParameter(): void
     {
         $mapper = new StrictJson();
         $json = '{"int_prop": null}';
@@ -288,7 +288,7 @@ class StrictJsonTest extends TestCase
     /**
      * @throws JsonFormatException
      */
-    public function testMissingPropertyInNestedClass()
+    public function testMissingPropertyInNestedClass(): void
     {
         $json = '
         {
@@ -313,7 +313,7 @@ class StrictJsonTest extends TestCase
     /**
      * @throws JsonFormatException
      */
-    public function testUnsupportedType()
+    public function testUnsupportedType(): void
     {
         $json = '{"object": {"should not": "work"}}';
         $mapper = new StrictJson();
@@ -325,7 +325,7 @@ class StrictJsonTest extends TestCase
     /**
      * @throws JsonFormatException
      */
-    public function testMissingPropertyInNestedArray()
+    public function testMissingPropertyInNestedArray(): void
     {
         $json = '
         {
@@ -351,7 +351,7 @@ class StrictJsonTest extends TestCase
     /**
      * @throws JsonFormatException
      */
-    public function testAdapterThatThrowsRuntimeException()
+    public function testAdapterThatThrowsRuntimeException(): void
     {
         $json = '{"does not": "matter"}';
         $mapper = StrictJson::builder()
@@ -366,7 +366,7 @@ class StrictJsonTest extends TestCase
     /**
      * @throws JsonFormatException
      */
-    public function testAdapterThatSupportsNoTypes()
+    public function testAdapterThatSupportsNoTypes(): void
     {
         $json = '{"does not": "matter"}';
         $mapper = StrictJson::builder()
@@ -381,7 +381,7 @@ class StrictJsonTest extends TestCase
     /**
      * @throws JsonFormatException
      */
-    public function testAdapterWithNotMatchingType()
+    public function testAdapterWithNotMatchingType(): void
     {
         $json = '{"nullable_prop": "invalid_type"}';
         $mapper = StrictJson::builder()
@@ -396,7 +396,7 @@ class StrictJsonTest extends TestCase
     /**
      * @throws JsonFormatException
      */
-    public function testAdapterThatSupportsManyTypesNotMatching()
+    public function testAdapterThatSupportsManyTypesNotMatching(): void
     {
         $json = '{"does not": "matter"}';
         $mapper = StrictJson::builder()
@@ -411,7 +411,7 @@ class StrictJsonTest extends TestCase
     /**
      * @throws JsonFormatException
      */
-    public function testAdapterThatSupportsNullable()
+    public function testAdapterThatSupportsNullable(): void
     {
         $json = '{"nullable_prop": null}';
         $mapper = StrictJson::builder()
@@ -429,7 +429,7 @@ class StrictJsonTest extends TestCase
      *
      * @throws JsonFormatException
      */
-    public function testModelThatThrowsInvalidArgumentException()
+    public function testModelThatThrowsInvalidArgumentException(): void
     {
         $json = '{"value": "not good enough"}';
         $mapper = new StrictJson();
@@ -439,7 +439,7 @@ class StrictJsonTest extends TestCase
     }
 
     /** @throws JsonFormatException */
-    public function testModelThatThrowsUnexpectedException()
+    public function testModelThatThrowsUnexpectedException(): void
     {
         $json = '{"value": "not good enough"}';
         $mapper = new StrictJson();
@@ -451,7 +451,7 @@ class StrictJsonTest extends TestCase
     /**
      * @throws JsonFormatException
      */
-    public function testMapScalarToClass()
+    public function testMapScalarToClass(): void
     {
         $json = '4';
         $mapper = new StrictJson();
@@ -462,7 +462,7 @@ class StrictJsonTest extends TestCase
     /**
      * @throws JsonFormatException
      */
-    public function testAdaptClassParam()
+    public function testAdaptClassParam(): void
     {
         $json = '{"int_prop_class": {"int_prop": 1}}';
         $mapper = StrictJson::builder()

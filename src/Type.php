@@ -32,7 +32,7 @@ class Type
         $this->typename = $typename;
         $this->nullable = $nullable;
 
-        $this->is_scalar = in_array($this->typename, self::SCALAR_TYPES);
+        $this->is_scalar = in_array($this->typename, self::SCALAR_TYPES, true);
         $this->is_array = $this->typename === 'array';
         $this->is_class = class_exists($typename);
     }
@@ -70,10 +70,23 @@ class Type
      */
     public static function from(ReflectionParameter $parameter, JsonPath $path): Type
     {
-        $parameter_type = $parameter->getType()->getName();
+        $type = $parameter->getType();
+        if ($type === null) {
+            $class = $parameter->getDeclaringClass();
+            $function = $parameter->getDeclaringFunction();
+
+            $function_location = $class !== null ? $class->getName() : $function->getFileName();
+            $parameter_location = "$function_location::{$function->getName()}";
+
+            throw new InvalidConfigurationException(
+                "$parameter_location has parameter named {$parameter->getName()} with no specified type",
+                $path
+            );
+        }
+        $parameter_type = $type->getName();
         if ($parameter->isArray()) {
             return new Type('array', $parameter->allowsNull());
-        } elseif (in_array($parameter_type, self::SCALAR_TYPES)) {
+        } elseif (in_array($parameter_type, self::SCALAR_TYPES, true)) {
             return new Type($parameter_type, $parameter->allowsNull());
         } elseif (class_exists($parameter_type)) {
             return new Type($parameter_type, $parameter->allowsNull());

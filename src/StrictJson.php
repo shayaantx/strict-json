@@ -12,7 +12,7 @@ class StrictJson
 {
     /** @var array */
     private $type_adapters;
-    /** @var ConstructorParameterFetcher|null */
+    /** @var ConstructorParameterFetcher */
     private $parameter_finder;
 
 
@@ -130,7 +130,7 @@ class StrictJson
 
         $supports_value = false;
         foreach ($adapter->fromTypes() as $supported_type) {
-            $supports_value |= $supported_type->allowsValue($value);
+            $supports_value = $supports_value || $supported_type->allowsValue($value);
         }
 
         if (!$supports_value) {
@@ -167,7 +167,7 @@ class StrictJson
     }
 
     /**
-     * @param $decoded_json
+     * @param mixed $decoded_json
      * @param Type $target_type
      * @param JsonPath $path
      *
@@ -186,7 +186,7 @@ class StrictJson
 
     /** @noinspection PhpDocMissingThrowsInspection */
     /**
-     * @param $decoded_json
+     * @param mixed $decoded_json
      * @param Type $target_type
      * @param JsonPath $path
      *
@@ -251,7 +251,7 @@ class StrictJson
     private function safeDecode(string $json)
     {
         $decoded = json_decode($json, true);
-        if (json_last_error()) {
+        if (json_last_error() !== JSON_ERROR_NONE) {
             $err = json_last_error_msg();
             throw new JsonFormatException(
                 "Unable to parse invalid JSON ($err): $json",

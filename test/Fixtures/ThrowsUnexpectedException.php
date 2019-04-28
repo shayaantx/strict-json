@@ -6,8 +6,12 @@ use RuntimeException;
 
 class ThrowsUnexpectedException
 {
-    public function __construct(/** @noinspection PhpUnusedParameterInspection */ string $value)
+    /** @var string */
+    private $value;
+
+    public function __construct(string $value)
     {
+        $this->value = $value;
         throw new RuntimeException("I've never been the best at constructing");
     }
 }

@@ -9,20 +9,20 @@ use RuntimeException;
 
 class TypedParameterTest extends TestCase
 {
-    public function testNoDefaultValue()
+    public function testNoDefaultValue(): void
     {
         $param = new TypedParameter(Type::int(), TypedParameter::noDefaultValue(), null);
         $this->assertFalse($param->hasDefaultValue());
     }
 
-    public function testHasNullDefaultValue()
+    public function testHasNullDefaultValue(): void
     {
         $param = new TypedParameter(Type::int(), null, null);
         $this->assertTrue($param->hasDefaultValue());
         $this->assertNull($param->getDefaultValue());
     }
 
-    public function testGetDefaultValueWhenNoneExists()
+    public function testGetDefaultValueWhenNoneExists(): void
     {
         $param = new TypedParameter(Type::int(), TypedParameter::noDefaultValue(), null);
         $this->expectException(RuntimeException::class);

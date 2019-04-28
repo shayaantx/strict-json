@@ -2,7 +2,6 @@
 
 namespace Burba\StrictJson\Internal;
 
-use Burba\StrictJson\Adapter;
 use Burba\StrictJson\InvalidConfigurationException;
 use Burba\StrictJson\JsonPath;
 use Burba\StrictJson\Type;
@@ -14,8 +13,9 @@ use ReflectionException;
  */
 class ConstructorParameterFetcher
 {
+    /** @var array Mapping of class names to a mapping of parameter names to types */
     private $constructor_params_by_class = [];
-    /** @var Adapter[string] */
+    /** @var array Mapping of strings to Adapters */
     private $parameter_adapters;
 
     public function __construct(array $parameter_adapters = [])
@@ -67,13 +67,6 @@ class ConstructorParameterFetcher
         $refl_params = $constructor->getParameters();
         foreach ($refl_params as $refl_param) {
             $param_name = $refl_param->getName();
-            if (!$refl_param->hasType()) {
-                throw new InvalidConfigurationException(
-                    "$classname::__construct has parameter named $param_name with no specified type",
-                    $path
-                );
-            }
-
             $param_type = Type::from($refl_param, $path);
             /** @noinspection PhpUnhandledExceptionInspection */
             $default_value = $refl_param->isDefaultValueAvailable()
