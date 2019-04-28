@@ -20,6 +20,13 @@ class DefaultIfNullAdapter implements Adapter
         $this->default_value = $default_value;
     }
 
+    /**
+     * @param float|null $decoded_json
+     * @param StrictJson $delegate
+     * @param JsonPath $path
+     *
+     * @return float
+     */
     public function fromJson($decoded_json, StrictJson $delegate, JsonPath $path): float
     {
         return $decoded_json === null ? $this->default_value : $decoded_json;

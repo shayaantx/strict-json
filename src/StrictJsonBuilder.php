@@ -7,7 +7,9 @@ use Burba\StrictJson\Internal\ConstructorParameterFetcher;
 
 class StrictJsonBuilder
 {
+    /** @var array */
     private $parameter_adapters = [];
+    /** @var array */
     private $class_adapters = [];
 
     public function addParameterAdapter(string $class_name, string $parameter_name, Adapter $adapter): self

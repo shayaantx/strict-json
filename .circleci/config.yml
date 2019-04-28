@@ -23,6 +23,9 @@ jobs:
           name: Check Code Style
           command: "./scripts/check_code_style.sh"
       - run:
+          name: Run Static Analysis
+          command: "./scripts/run_static_analysis.sh"
+      - run:
           name: Run Tests
           command: "./scripts/run_tests.sh"
       - run:

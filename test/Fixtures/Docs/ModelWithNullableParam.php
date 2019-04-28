@@ -4,6 +4,7 @@ namespace Burba\StrictJson\Fixtures\Docs;
 
 class ModelWithNullableParam
 {
+    /** @var string|null */
     private $nullable_param;
 
     public function __construct(?string $nullable_param)

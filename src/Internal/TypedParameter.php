@@ -12,9 +12,11 @@ use stdClass;
  */
 class TypedParameter
 {
+    /** @var stdClass */
     private static $no_default_value;
     /** @var Type */
     private $type;
+    /** @var mixed */
     private $default_value;
     /** @var Adapter|null */
     private $adapter;
@@ -28,6 +30,11 @@ class TypedParameter
         return self::$no_default_value;
     }
 
+    /**
+     * @param Type $type
+     * @param mixed $default_value
+     * @param Adapter|null $adapter
+     */
     public function __construct(Type $type, $default_value, ?Adapter $adapter)
     {
         $this->type = $type;
@@ -40,11 +47,12 @@ class TypedParameter
         return $this->type;
     }
 
-    public function hasDefaultValue()
+    public function hasDefaultValue(): bool
     {
         return $this->default_value !== self::noDefaultValue();
     }
 
+    /** @return mixed */
     public function getDefaultValue()
     {
         if (!$this->hasDefaultValue()) {

@@ -7,8 +7,12 @@ use InvalidArgumentException;
 
 class ThrowsInvalidArgumentException
 {
-    public function __construct(/** @noinspection PhpUnusedParameterInspection */ string $value)
+    /** @var string */
+    private $value;
+
+    public function __construct(string $value)
     {
+        $this->value = $value;
         throw new InvalidArgumentException('I am very picky');
     }
 }

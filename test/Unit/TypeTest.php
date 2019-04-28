@@ -5,12 +5,18 @@ namespace Burba\StrictJson\Unit;
 
 use Burba\StrictJson\Fixtures\HasIntProp;
 use Burba\StrictJson\Fixtures\HasNullableProp;
+use Burba\StrictJson\Fixtures\NoTypesInConstructor;
+use Burba\StrictJson\InvalidConfigurationException;
+use Burba\StrictJson\JsonPath;
 use Burba\StrictJson\Type;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
+use ReflectionException;
+use ReflectionFunction;
 
 class TypeTest extends TestCase
 {
-    public function testAllowsMatchingTypes()
+    public function testAllowsMatchingTypes(): void
     {
         // Set up cases inside test method so that static factory functions count as covered
         // Code that runs inside a dataprovider doesn't count towards coverage, and therefore infection doesn't know
@@ -30,7 +36,7 @@ class TypeTest extends TestCase
         }
     }
 
-    public function testDoesNotAllowNonMatchingTypes()
+    public function testDoesNotAllowNonMatchingTypes(): void
     {
         // Set up cases inside test method so that static factory functions count as covered
         // Code that runs inside a dataprovider doesn't count towards coverage, and therefore infection doesn't know
@@ -45,5 +51,27 @@ class TypeTest extends TestCase
         foreach ($cases as $name => $case) {
             $this->assertFalse($case[0]->allowsValue($case[1]), "Expected $name not to be allowed");
         }
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    public function testFromClassParamWithNoTypes(): void
+    {
+        $class = new ReflectionClass(NoTypesInConstructor::class);
+        $constructor = $class->getConstructor();
+        // This assertion is just to satiate PHPStan
+        $this->assertNotNull($constructor);
+        $param = $constructor->getParameters()[0];
+        $this->expectException(InvalidConfigurationException::class);
+        Type::from($param, JsonPath::root());
+    }
+
+    public function testFromTopLevelFunction(): void
+    {
+        $function = new ReflectionFunction('json_encode');
+        $param = $function->getParameters()[0];
+        $this->expectException(InvalidConfigurationException::class);
+        Type::from($param, JsonPath::root());
     }
 }

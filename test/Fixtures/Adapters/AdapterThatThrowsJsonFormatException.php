@@ -12,10 +12,11 @@ class AdapterThatThrowsJsonFormatException implements Adapter
 {
 
     /**
-     * @param $decoded_json
+     * @param mixed $decoded_json
      * @param StrictJson $delegate
      * @param JsonPath $path
      * @throws JsonFormatException
+     * @return mixed
      */
     public function fromJson($decoded_json, StrictJson $delegate, JsonPath $path)
     {

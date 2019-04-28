@@ -4,6 +4,7 @@ namespace Burba\StrictJson\Fixtures\Docs;
 
 class ModelWithOptionalParam
 {
+    /** @var string */
     private $optional_param;
 
     public function __construct(string $optional_param = 'default')
