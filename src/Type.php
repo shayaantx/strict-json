@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Burba\StrictJson;
 
@@ -84,7 +86,7 @@ class Type
             );
         }
         $parameter_type = $type->getName();
-        if ($parameter->isArray()) {
+        if ($parameter->getType()->getName() === 'array') {
             return new Type('array', $parameter->allowsNull());
         } elseif (in_array($parameter_type, self::SCALAR_TYPES, true)) {
             return new Type($parameter_type, $parameter->allowsNull());
